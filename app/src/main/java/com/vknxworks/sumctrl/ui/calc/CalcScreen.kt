@@ -109,7 +109,10 @@ fun CalcScreen() {
     val preview = remember(state, settings.degrees) { state.preview(settings.degrees) }
 
     BoxWithConstraints(Modifier.fillMaxSize().statusBarsPadding()) {
-        val landscape = maxWidth > maxHeight
+        // Read here: the Column below is not a BoxWithConstraints scope.
+        val boxWidth = maxWidth
+        val boxHeight = maxHeight
+        val landscape = boxWidth > boxHeight
         val clearance = LocalBottomClearance.current
         val gap = 8.dp
 
@@ -150,7 +153,7 @@ fun CalcScreen() {
 
             if (landscape) {
                 // Side by side: scientific keys on the left, the keypad on the right.
-                val avail = (maxHeight - 60.dp - 90.dp - clearance - 12.dp).coerceAtLeast(150.dp)
+                val avail = (boxHeight - 60.dp - 90.dp - clearance - 12.dp).coerceAtLeast(150.dp)
                 val keyH = ((avail - gap * 4) / 5).coerceIn(32.dp, 64.dp)
                 Row(
                     Modifier.fillMaxWidth().padding(start = Gutter, end = Gutter, bottom = clearance + 12.dp),
@@ -160,9 +163,9 @@ fun CalcScreen() {
                     KeyGrid(keys.main, keyH, gap, Modifier.weight(1.2f))
                 }
             } else {
-                val keyW = (maxWidth - Gutter * 2 - gap * 3) / 4
+                val keyW = (boxWidth - Gutter * 2 - gap * 3) / 4
                 val sciRows = if (settings.scientific) 3 else 0
-                val avail = maxHeight - 60.dp - 150.dp - clearance - 12.dp
+                val avail = boxHeight - 60.dp - 150.dp - clearance - 12.dp
                 val units = 5f + sciRows * 0.62f
                 val gaps = gap * (4 + sciRows)
                 val keyH = min(keyW * 0.82f, (avail - gaps) / units).coerceAtLeast(40.dp)
