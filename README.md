@@ -2,7 +2,7 @@
 
 **An offline calculator, unit converter and work-tools app that replaces your phone's calculator.**
 
-[![Latest release](https://img.shields.io/github/v/release/VoidedKN0X/SumCtrl?label=download)](https://github.com/VoidedKN0X/SumCtrl/releases/latest) ![Android 13+](https://img.shields.io/badge/Android-13%2B-3DDC84?logo=android&logoColor=white) [![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue)](LICENSE) ![Telemetry-free](https://img.shields.io/badge/telemetry-none-brightgreen) ![Offline](https://img.shields.io/badge/internet-none-brightgreen) [![Sponsor](https://img.shields.io/badge/sponsor-GitHub-ea4aaa?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/VoidedKN0X)
+[![Latest release](https://img.shields.io/github/v/release/VoidedKN0X/SumCtrl?label=download)](https://github.com/VoidedKN0X/SumCtrl/releases/latest) ![Android 15+](https://img.shields.io/badge/Android-15%2B-3DDC84?logo=android&logoColor=white) [![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue)](LICENSE) ![Telemetry-free](https://img.shields.io/badge/telemetry-none-brightgreen) ![Offline](https://img.shields.io/badge/internet-none-brightgreen) [![Sponsor](https://img.shields.io/badge/sponsor-GitHub-ea4aaa?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/VoidedKN0X)
 
 SumCtrl is a calculator with exact decimal maths, a scientific keypad, history, a unit converter and tools for everyday shop sums: VAT, discounts, margins, instalments and percentages. It never goes online.
 
@@ -27,7 +27,7 @@ Part of the [Ctrl series](#the-ctrl-series) by VKNXWorks.
 
 ## Requirements
 
-- Android 13 or newer, on a 64-bit ARM phone (nearly every phone from the last several years)
+- Android 15 or newer, on a 64-bit ARM phone (nearly every phone from the last several years)
 - Permissions: biometrics, only for the optional fingerprint unlock. **No internet** and nothing else to grant
 - **Google-free and de-Googled:** no Google Play services, Firebase or other Google libraries, and the app never contacts Google. It works the same on de-Googled phones (GrapheneOS, CalyxOS, /e/OS, LineageOS without Google apps).
 
