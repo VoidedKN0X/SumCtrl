@@ -1,5 +1,6 @@
 package com.vknxworks.sumctrl.ui.components
 
+import com.vknxworks.sumctrl.ui.lock.GuardWindow
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.BorderStroke
@@ -409,10 +410,15 @@ fun CtrlAlertDialog(
     dismissButton: (@Composable () -> Unit)? = null,
     title: (@Composable () -> Unit)? = null,
     text: (@Composable () -> Unit)? = null,
+    // Protects a destructive confirmation from other apps' overlays while it shows.
+    guard: Boolean = false,
 ) {
     AlertDialog(
         onDismissRequest = onDismissRequest,
-        confirmButton = confirmButton,
+        confirmButton = {
+            GuardWindow(guard)
+            confirmButton()
+        },
         dismissButton = dismissButton,
         title = title,
         text = text,
