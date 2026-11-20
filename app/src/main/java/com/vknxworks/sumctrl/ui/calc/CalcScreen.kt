@@ -38,6 +38,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -91,16 +92,25 @@ fun CalcScreen() {
     var historyOpen by rememberSaveable { mutableStateOf(false) }
     var inverse by rememberSaveable { mutableStateOf(false) }
 
-    fun press(change: (CalcState) -> CalcState) {
-        if (settings.keyHaptics) view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-        c.calc.value = change(c.calc.value)
+    // The key handlers are kept across recompositions (they read the newest settings through this), so the
+    // keypad below doesn't have to be rebuilt and redrawn on every key press.
+    val currentSettings = rememberUpdatedState(settings)
+
+    val press = remember<((CalcState) -> CalcState) -> Unit>(c, view) {
+        { change ->
+            if (currentSettings.value.keyHaptics) view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+            c.calc.value = change(c.calc.value)
+        }
     }
 
-    fun onEqualsPressed() {
-        if (settings.keyHaptics) view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-        val (next, result) = c.calc.value.equals(settings.degrees)
-        if (result != null && settings.saveHistory) c.history.add(c.calc.value.tokens, result.toPlainString())
-        c.calc.value = next
+    val onEqualsPressed = remember<() -> Unit>(c, view) {
+        {
+            val now = currentSettings.value
+            if (now.keyHaptics) view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+            val (next, result) = c.calc.value.equals(now.degrees)
+            if (result != null && now.saveHistory) c.history.add(c.calc.value.tokens, result.toPlainString())
+            c.calc.value = next
+        }
     }
 
     fun setDegrees(on: Boolean) = c.appScope.launch { c.settings.update { it.copy(degrees = on) } }
@@ -143,13 +153,16 @@ fun CalcScreen() {
                 modifier = Modifier.weight(1f).fillMaxWidth(),
             )
 
-            val keys = Keys(
-                fmt = fmt,
-                inverse = inverse,
-                onInverse = { inverse = !inverse },
-                press = ::press,
-                onEquals = ::onEqualsPressed,
-            )
+            // Built once per number format; only the scientific rows change with INV.
+            val keys = remember(fmt, press, onEqualsPressed) {
+                Keys(
+                    fmt = fmt,
+                    onInverse = { inverse = !inverse },
+                    press = press,
+                    onEquals = onEqualsPressed,
+                )
+            }
+            val scientificKeys = remember(keys, inverse) { keys.scientific(inverse) }
 
             if (landscape) {
                 // Side by side: scientific keys on the left, the keypad on the right.
@@ -159,7 +172,7 @@ fun CalcScreen() {
                     Modifier.fillMaxWidth().padding(start = Gutter, end = Gutter, bottom = clearance + 12.dp),
                     horizontalArrangement = Arrangement.spacedBy(gap * 2),
                 ) {
-                    KeyGrid(keys.scientific(inverse), keyH * 5 / 3 + gap * 2 / 3, gap, Modifier.weight(1f), small = true)
+                    KeyGrid(scientificKeys, keyH * 5 / 3 + gap * 2 / 3, gap, Modifier.weight(1f), small = true)
                     KeyGrid(keys.main, keyH, gap, Modifier.weight(1.2f))
                 }
             } else {
@@ -175,7 +188,7 @@ fun CalcScreen() {
                         enter = expandVertically() + fadeIn(),
                         exit = shrinkVertically() + fadeOut(),
                     ) {
-                        KeyGrid(keys.scientific(inverse), keyH * 0.62f, gap, Modifier.fillMaxWidth().padding(bottom = gap), small = true)
+                        KeyGrid(scientificKeys, keyH * 0.62f, gap, Modifier.fillMaxWidth().padding(bottom = gap), small = true)
                     }
                     KeyGrid(keys.main, keyH, gap, Modifier.fillMaxWidth())
                 }
@@ -393,7 +406,6 @@ private class Key(
 /** Every key, wired to the calculator. */
 private class Keys(
     fmt: NumFmt,
-    private val inverse: Boolean,
     private val onInverse: () -> Unit,
     private val press: ((CalcState) -> CalcState) -> Unit,
     onEquals: () -> Unit,

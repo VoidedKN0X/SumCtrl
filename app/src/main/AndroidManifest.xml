@@ -39,6 +39,8 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+                <!-- Lets launchers and assistants that look for "the calculator app" find SumCtrl. -->
+                <category android:name="android.intent.category.APP_CALCULATOR" />
             </intent-filter>
         </activity>
 

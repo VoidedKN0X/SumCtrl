@@ -4,6 +4,20 @@ What changed in each SumCtrl release. Every release on the [Releases page](https
 
 To publish a new version: bump `versionCode` and `versionName` in `app/build.gradle.kts`, add a section here, and push to `main`. Pushes without a version bump only build; they don't make a release.
 
+## Unreleased
+
+Not released yet: these changes are in the code and will ship with the next version. The calculator, converter and work tools work as before.
+
+### Changed
+
+- **Smoother keypad.** Pressing a key no longer rebuilds and redraws all the keys; only the sum and its result at the top are updated. The keys, the vibration setting and History behave exactly as before.
+- **Opens with your settings already in place.** SumCtrl now waits a few milliseconds (half a second at most) for your saved settings before it draws its first screen, so the scientific keys, DEG/RAD and the decimal separator no longer appear in their default state for a moment and then change.
+- **Found as the phone's calculator.** SumCtrl now tells Android it is a calculator app, so launchers and assistants that look for "the calculator" can find it. Nothing changes in the app itself.
+
+### Privacy
+
+- **"Hide in screenshots" is on from the very first frame.** The window now starts hidden from screenshots and screen recordings, and that is lifted only once your saved settings say the switch is off. Before, the protection was switched on a few frames after the app opened.
+
 ## v0.1.4 (2026-11-13)
 
 A small security and privacy update. The calculator, converter and work tools work as before.
