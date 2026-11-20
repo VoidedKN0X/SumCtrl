@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
 }
@@ -15,7 +14,7 @@ val releaseSigningComplete: Boolean = releaseKeystorePath != null &&
 
 android {
     namespace = "com.vknxworks.sumctrl"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.vknxworks.sumctrl"
