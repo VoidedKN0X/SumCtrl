@@ -51,6 +51,7 @@ import java.math.BigDecimal
 fun HistorySheet(fmt: NumFmt, enabled: Boolean, onDismiss: () -> Unit, onPick: (BigDecimal) -> Unit) {
     val c = LocalContext.current.container
     val entries by c.history.entries.collectAsStateWithLifecycle()
+    val setAside by c.history.setAside.collectAsStateWithLifecycle()
     var confirmClear by remember { mutableStateOf(false) }
 
     CtrlBottomSheet(onDismissRequest = onDismiss) {
@@ -67,7 +68,13 @@ fun HistorySheet(fmt: NumFmt, enabled: Boolean, onDismiss: () -> Unit, onPick: (
             entries.isEmpty() -> MessageView(
                 if (enabled) Icons.Outlined.History else Icons.Outlined.HistoryToggleOff,
                 stringResource(if (enabled) R.string.history_empty else R.string.history_off),
-                stringResource(if (enabled) R.string.history_empty_body else R.string.history_off_body),
+                stringResource(
+                    when {
+                        !enabled -> R.string.history_off_body
+                        setAside -> R.string.history_set_aside_body
+                        else -> R.string.history_empty_body
+                    },
+                ),
                 modifier = Modifier.fillMaxWidth().heightIn(min = 240.dp).navigationBarsPadding(),
             )
             else -> LazyColumn(Modifier.fillMaxWidth().navigationBarsPadding(), contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 24.dp)) {

@@ -1,6 +1,6 @@
 # SumCtrl
 
-Offline calculator, unit converter and work tools in the VKNXWorks Ctrl series. Kotlin, Jetpack Compose, Material 3, manual DI (`AppContainer`), a JSON file in private storage for history plus DataStore for settings — the same structure as RideCtrl and BeamCtrl.
+Offline calculator, unit converter and work tools in the VKNXWorks Ctrl series. Kotlin, Jetpack Compose, Material 3, manual DI (`AppContainer`), a JSON file in private storage for history (encrypted at rest) plus DataStore for settings — the same structure as RideCtrl and BeamCtrl.
 
 ## Layout
 
@@ -17,6 +17,14 @@ Offline calculator, unit converter and work tools in the VKNXWorks Ctrl series. 
 - arm64-v8a only. Every user-facing string goes in `strings.xml`.
 - Settings open only from the profile picture. No settings tab, menu or gear icon, no You tab.
 - Money and arithmetic stay exact (`BigDecimal`); round only for display. Number inputs accept both `,` and `.` as the decimal separator.
+
+## Encryption at rest
+
+- `history.json` is sealed with AES-256-GCM (`data/crypto/SealedFile`, marker `SUMCTRL-REST1`) under the data key (`DataKeyStore`: 32 random bytes in `filesDir/data.key`, wrapped by the Keystore key `sumctrl_data_at_rest` through `KeystoreWrapper`/`KeystoreAes`; no user authentication, independent of the app lock). Settings (DataStore) and the app lock vault are not touched.
+- `HistoryRepository` accepts both sealed and ordinary files (`SealedFile.isSealed`). Without a data key it reads and writes the ordinary file as before. All of it runs on `Dispatchers.IO`; nothing asks the Keystore on the main thread.
+- An ordinary file only becomes a sealed one through `SealedFile.sealInPlace` (temp file, sync, read back, compare, atomic rename). Never replace an existing `data.key`, and never create a Keystore key on the decrypt path (`KeystoreAes.existing`).
+- A sealed history that can't be opened is never overwritten: it is renamed to `history.json.unreadable`, a new history starts (`HistoryRepository.setAside` drives the note in the History sheet), and it is merged back when it opens at a later start. Only `clear()` deletes it.
+- There are no unit tests in this app (no test source set), so none were added for this.
 
 ## Dependency verification
 

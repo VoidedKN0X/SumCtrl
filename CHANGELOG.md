@@ -4,6 +4,18 @@ What changed in each SumCtrl release. Every release on the [Releases page](https
 
 To publish a new version: bump `versionCode` and `versionName` in `app/build.gradle.kts`, add a section here, and push to `main`. Pushes without a version bump only build; they don't make a release.
 
+## Unreleased
+
+Not released yet (no version number). Built and checked by CI only: none of this has been run on a phone.
+
+### Security
+
+- **Your history is now encrypted on the phone.** The file that holds your finished sums (`history.json` in SumCtrl's private storage) is sealed with AES-256-GCM under a random 256-bit data key. That key is stored next to it in `data.key`, itself encrypted by a key in the phone's secure hardware (Android Keystore, StrongBox when the phone has it) that can't be exported. This protects the history file when it is copied off the phone (a backup image, a forensic copy, a rooted file manager); it does not protect against something already running inside SumCtrl while the app is open. The key needs no fingerprint or PIN and is independent of the app lock.
+- **The move is automatic and can't lose your history.** The first time this version starts, the existing history is read as before. Its encrypted copy is then written to a temporary file, synced to disk, read back, decrypted and compared byte for byte; only when it matches does it take the old file's place, in one step. If anything goes wrong the old file simply stays in use and SumCtrl tries again at the next start. Both kinds of file are read from now on.
+- **If the encrypted history can't be opened** (the key is missing from the phone's secure storage, or the file is damaged), it is not deleted or overwritten: it is moved aside as `history.json.unreadable`, a new history starts, and the empty History sheet says so. If the key works again at a later start, the sums from the file kept aside are put back by themselves. **Clear history** (and "Forgot PIN?") deletes a history that was kept aside too. If the phone's secure hardware can't provide a key at all, SumCtrl keeps saving an ordinary, unencrypted history file exactly as before.
+- **Not encrypted:** the settings (decimal separator, DEG/RAD, VAT rate and so on) hold nothing about what you calculated and stay an ordinary settings file. The app lock's own storage is unchanged.
+- **No going back to an older version with your history.** SumCtrl 0.1.5 and older can't read the encrypted file: they show an empty history and replace the file the next time you finish a sum. SumCtrl has no export for its history, so stay on this version or newer if you want to keep it.
+
 ## v0.1.5 (2026-11-20)
 
 Built and checked by CI only: nothing in this release had been run on a phone when it was published.

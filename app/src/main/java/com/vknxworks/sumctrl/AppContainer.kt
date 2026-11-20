@@ -3,6 +3,8 @@ package com.vknxworks.sumctrl
 import android.content.Context
 import com.vknxworks.sumctrl.data.HistoryRepository
 import com.vknxworks.sumctrl.data.calc.CalcState
+import com.vknxworks.sumctrl.data.crypto.DataKeyStore
+import com.vknxworks.sumctrl.data.crypto.KeystoreWrapper
 import com.vknxworks.sumctrl.data.lock.LockVault
 import com.vknxworks.sumctrl.data.settings.AppSettings
 import com.vknxworks.sumctrl.data.settings.SettingsRepository
@@ -23,7 +25,12 @@ class AppContainer(val context: Context) {
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default + CoroutineExceptionHandler { _, _ -> })
 
     val settings = SettingsRepository(context, appScope)
-    val history = HistoryRepository(context, appScope)
+    /**
+     * The key the history file is encrypted with at rest. Nothing is asked of the phone's secure hardware here:
+     * that happens on a background thread, the first time the history is read or saved.
+     */
+    private val dataKeys = DataKeyStore(context.filesDir, KeystoreWrapper("sumctrl_data_at_rest"))
+    val history = HistoryRepository(context, appScope, dataKeys)
 
     /** The calculator's line. Kept here so it survives switching tabs and rotating the phone. */
     val calc = MutableStateFlow(CalcState())

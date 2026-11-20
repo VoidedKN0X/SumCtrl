@@ -102,6 +102,7 @@ Turn it on under **Settings > Privacy and security > App lock** (tap your profil
 **Telemetry-free.** SumCtrl has no analytics, crash reporting, usage stats or tracking of any kind. It has **no internet permission**, works fully offline and never connects to the internet. Every build checks that the app has no network permission and no Google libraries.
 
 - Your history and settings stay on your phone. SumCtrl is left out of Android's cloud backup and its phone-to-phone transfer, so nothing leaves the phone.
+- Your history is stored encrypted on the phone (AES-256-GCM, with a key protected by the phone's secure hardware). That protects the file if it is ever copied off the phone; it works without a PIN and is separate from the app lock. Settings are an ordinary file: they hold nothing about your sums.
 - Copying a result puts it on Android's clipboard, only when you long-press it.
 - The Support, Report a bug, Source code and Licence links on the You page open in your browser, only when you tap them.
 

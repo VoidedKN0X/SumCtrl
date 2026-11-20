@@ -116,6 +116,7 @@
     <string name="history_clear_body">Every saved sum is deleted from this phone. This can\'t be undone.</string>
     <string name="history_empty">No sums yet</string>
     <string name="history_empty_body">Every sum you finish with = shows up here. Tap one to use its result again.</string>
+    <string name="history_set_aside_body">Your earlier history is stored encrypted on this phone and couldn\'t be opened, so a new history was started. The earlier one is kept aside, not deleted, and comes back by itself if it can be opened again. Clearing your history deletes it too.</string>
     <string name="history_off">History is off</string>
     <string name="history_off_body">Turn on Save history in Settings to keep finished sums here.</string>
     <string name="history_remove">Remove from history</string>
