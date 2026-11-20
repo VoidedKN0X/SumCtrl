@@ -4,6 +4,14 @@ What changed in each SumCtrl release. Every release on the [Releases page](https
 
 To publish a new version: bump `versionCode` and `versionName` in `app/build.gradle.kts`, add a section here, and push to `main`. Pushes without a version bump only build; they don't make a release.
 
+## Unreleased
+
+Changes on `main` that aren't in a release yet. They ship with the next version.
+
+### Changed
+
+- **Newer build tools and libraries; nothing changes in how SumCtrl looks or works.** SumCtrl is now built with the same toolchain as the newest Ctrl apps: Android Gradle Plugin 8.11.1 → 8.13.2, Kotlin 2.2.0 → 2.4.21 (with its Compose and serialization compiler plugins), Compose BOM 2025.07.00 → 2026.06.01, and AndroidX Activity 1.10.1 → 1.13.0, Core 1.16.0 → 1.18.0, Lifecycle 2.9.1 → 2.10.0, Navigation 2.9.1 → 2.9.8, DataStore 1.1.7 → 1.3.0, kotlinx.serialization 1.9.0 → 1.13.0 and kotlinx.coroutines 1.10.2 → 1.11.0. Gradle stays at 8.14.3. No library was added, the app is still Google-free and offline, and the Android versions it runs on are unchanged. The checksums Gradle verifies every download against (`gradle/verification-metadata.xml`) were regenerated on CI for the new versions. Built and checked by CI only; not yet run on a phone.
+
 ## v0.2.0 (2026-11-20)
 
 **This release encrypts some of what the app stores on the phone. An older version cannot read it afterwards, so export or back up anything you need before you update (details below).** Built and checked by CI only: nothing in this release had been run on a phone when it was published.
