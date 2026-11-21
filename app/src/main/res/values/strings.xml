@@ -426,7 +426,7 @@
     <string name="angle_degrees">Degrees</string>
     <string name="angle_radians">Radians</string>
     <string name="group_numbers">Numbers</string>
-    <string name="numbers_footer">Typing accepts both a comma and a point, whatever is shown. Currency only labels amounts in the work tools; nothing is converted.</string>
+    <string name="numbers_footer">Typing accepts both a comma and a point, whatever is shown. The currency labels amounts in the work tools; money is only converted in the Currency tool, with a rate you type.</string>
     <string name="decimal_separator">Decimal separator</string>
     <string name="sep_phone">Follow the phone</string>
     <string name="sep_comma">Comma (1,5)</string>

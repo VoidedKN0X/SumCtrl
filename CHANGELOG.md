@@ -22,6 +22,12 @@ Changes on `main` that aren't in a release yet. They ship with the next version.
 
 - **Settings export and import.** **Settings → Export and import** saves your settings as a JSON file in a place you pick (angles, scientific keys, key vibration, save history, decimal separator, grouping, currency, the VAT rate to start with, the currency tool's currencies and rate, and Hide in screenshots / Hide in recent apps) and reads such a file back. Importing says what it replaces and asks first. The file never holds your history, memory, named values, the app lock, its PIN or **Lock again**, and importing can only turn Hide in screenshots and Hide in recent apps on, never off. Values that don't make sense are skipped and stay as they are.
 
+- **SumCtrl in Dutch.** When your phone is set to Dutch, SumCtrl shows everything in Dutch (informal "je"), including the "Calculate" entry in other apps' text-selection menu; in any other language it stays English. There is no language setting in the app: it follows the phone. The app name, unit symbols and key labels (DEG, SCI, AC…) stay as they are.
+
+### Changed
+
+- The Numbers footer in Settings no longer says money is never converted: it is, in the new Currency tool, with a rate you type.
+
 ### Project
 
 - **Unit tests.** SumCtrl now has tests (JUnit 4.13.2, test-only, not in the app) for the new logic: cursor editing, memory and named values in sums, the programmer engine, the tip, date, loan and currency maths, reading a selected sum and the CSV export. They were run on a computer with the Kotlin compiler; CI builds the app but doesn't run them yet.
