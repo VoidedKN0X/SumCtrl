@@ -78,6 +78,8 @@ fun SettingsScreen() {
 
             NumbersGroup(settings) { t -> set(t) }
 
+            BackupGroup()
+
             PrivacyAndSecurityGroup(settings)
         }
     }

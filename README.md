@@ -26,6 +26,7 @@ Part of the [Ctrl series](#the-ctrl-series) by VKNXWorks.
 - **Work tools:** VAT (add or remove 21 %, 12 %, 6 % or your own rate), discounts with an extra discount on top, margin and markup, instalments with interest, percentages (X % of Y, what percent, percentage change), tip and split, date difference (days, weeks, months, workdays), a month-by-month loan table, and currency conversion with a rate you type
 - **Programmer mode:** 64-bit whole numbers in hex, decimal, octal and binary at once, with AND, OR, XOR, NOT, shifts and mod
 - **Numbers your way:** decimal comma or point (or follow your phone), thousands grouping, and your currency for the work tools. Number fields take a comma or a period either way
+- **Export and import your settings** as a file (never the history, memory, named values or the app lock)
 - **App lock** with its own PIN and optional fingerprint unlock, and **Hide in screenshots** / **Hide in recent apps** (both off until you turn them on)
 - **Ctrl / Signal look**, shared by every Ctrl app: dark and light, following your phone's dark theme setting, high contrast, one violet accent, Space Grotesk and JetBrains Mono; landscape, tablet and foldable layouts
 

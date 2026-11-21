@@ -434,4 +434,20 @@
     <string name="group_thousands">Group thousands</string>
     <string name="group_thousands_sub">Show 1 234 567 instead of 1234567</string>
     <string name="default_vat">VAT rate to start with</string>
+
+    <!-- Settings export and import -->
+    <string name="backup_title">Export and import</string>
+    <string name="backup_footer">A settings file holds how the calculator and numbers look and the work tools\' starting values. It never holds your history, memory, named values, the app lock or its PIN.</string>
+    <string name="backup_save">Export settings</string>
+    <string name="backup_save_sub">Save them to a file you pick</string>
+    <string name="backup_restore">Import settings</string>
+    <string name="backup_restore_sub">From a SumCtrl settings file</string>
+    <string name="backup_restore_title">Import settings?</string>
+    <string name="backup_restore_body">The settings from the file of %1$s replace these settings here: angles, scientific keys, key vibration, save history, decimal separator, thousands grouping, currency, the VAT rate to start with and the currency tool\'s currencies and rate. Hide in screenshots and Hide in recent apps are only turned on, never off. The app lock, history, memory and named values stay as they are.</string>
+    <string name="backup_restore_confirm">Import</string>
+    <string name="backup_saved">Settings saved to the file</string>
+    <string name="backup_save_failed">Couldn\'t save the file</string>
+    <string name="backup_restored">Settings imported</string>
+    <string name="backup_not_valid">This isn\'t a SumCtrl settings file, or it\'s damaged.</string>
+    <string name="backup_too_new">This file is from a newer SumCtrl. Update SumCtrl first.</string>
 </resources>
