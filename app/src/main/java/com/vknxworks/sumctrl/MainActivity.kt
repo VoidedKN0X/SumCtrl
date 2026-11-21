@@ -17,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vknxworks.sumctrl.ui.lock.AppLockGate
 import com.vknxworks.sumctrl.ui.lock.GuardWindow
+import com.vknxworks.sumctrl.ui.lock.AppLock
 import com.vknxworks.sumctrl.ui.lock.lockCovering
 import com.vknxworks.sumctrl.ui.nav.AppRoot
 import com.vknxworks.sumctrl.ui.theme.SumCtrlTheme
