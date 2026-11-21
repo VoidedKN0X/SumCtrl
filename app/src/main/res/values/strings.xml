@@ -125,11 +125,11 @@
     <string name="values_save_title">Save %1$s as</string>
     <string name="values_name">Name</string>
     <string name="values_name_hint">Letters, digits and _, starting with a letter. Use it in sums by name.</string>
-    <string name="values_name_invalid">Start with a letter and use only letters, digits and _. Names of keys such as e, M, Ans or sin can't be used.</string>
+    <string name="values_name_invalid">Start with a letter and use only letters, digits and _. Names of keys such as e, M, Ans or sin can\'t be used.</string>
     <string name="values_name_replaces">A value with this name exists and will be replaced.</string>
     <string name="values_empty">No named values</string>
     <string name="values_empty_body">Save a result under a name, like rate or rent, and use it in later sums with every digit it was saved with. They are kept encrypted on this phone.</string>
-    <string name="values_set_aside_body">Your earlier named values are stored encrypted on this phone and couldn't be opened, so they were kept aside, not deleted. They come back by themselves if they can be opened again.</string>
+    <string name="values_set_aside_body">Your earlier named values are stored encrypted on this phone and couldn\'t be opened, so they were kept aside, not deleted. They come back by themselves if they can be opened again.</string>
     <string name="values_use">Use in the sum</string>
     <string name="values_remove">Delete this value</string>
 
@@ -150,7 +150,7 @@
     <string name="history_note_hint">What this sum was for. Leave empty to remove the note.</string>
     <string name="csv_export">Export as CSV</string>
     <string name="csv_saved">History saved as a CSV file</string>
-    <string name="csv_failed">Couldn't save the CSV file</string>
+    <string name="csv_failed">Couldn\'t save the CSV file</string>
     <string name="csv_time">Time</string>
     <string name="csv_sum">Sum</string>
     <string name="csv_result">Result</string>
@@ -365,7 +365,7 @@
     <string name="tip_total">Total with tip</string>
     <string name="tip_paid_rounded">%1$d people pay together</string>
     <string name="tip_no_people">Split between at least 1 person.</string>
-    <string name="tip_note">Each share is rounded up to the cent, so together you always cover the bill; the last line shows what that adds up to when it's a little more.</string>
+    <string name="tip_note">Each share is rounded up to the cent, so together you always cover the bill; the last line shows what that adds up to when it\'s a little more.</string>
 
     <string name="dates_from">From</string>
     <string name="dates_to">To</string>
@@ -376,7 +376,7 @@
     <string name="dates_weeks">In weeks</string>
     <string name="dates_period">In years, months and days</string>
     <string name="dates_workdays">Workdays (Mon–Fri)</string>
-    <string name="dates_note">Counts from the first date up to, but not including, the second. Workdays are Monday to Friday; public holidays aren't taken off.</string>
+    <string name="dates_note">Counts from the first date up to, but not including, the second. Workdays are Monday to Friday; public holidays aren\'t taken off.</string>
     <plurals name="days">
         <item quantity="one">%d day</item>
         <item quantity="other">%d days</item>
@@ -395,7 +395,7 @@
     </plurals>
 
     <string name="loan_amount">Amount borrowed</string>
-    <string name="loan_impossible">Use 1 to %1$d months, and an amount and rate that aren't negative.</string>
+    <string name="loan_impossible">Use 1 to %1$d months, and an amount and rate that aren\'t negative.</string>
     <string name="loan_table">Month by month</string>
     <string name="loan_col_month">#</string>
     <string name="loan_col_payment">Payment</string>
@@ -403,14 +403,14 @@
     <string name="loan_col_principal">Principal</string>
     <string name="loan_col_balance">Left</string>
     <string name="loan_show_all">Show all %1$d months</string>
-    <string name="loan_note">Fixed monthly payments with the yearly rate split over 12 months, worked out in cents like a bank statement: the payment and each month's interest are rounded to the cent, and the last payment is adjusted so nothing is left. A lender's offer can differ because of fees.</string>
+    <string name="loan_note">Fixed monthly payments with the yearly rate split over 12 months, worked out in cents like a bank statement: the payment and each month\'s interest are rounded to the cent, and the last payment is adjusted so nothing is left. A lender\'s offer can differ because of fees.</string>
 
     <string name="fx_from">From</string>
     <string name="fx_to">To</string>
     <string name="fx_rate">Rate: 1 %1$s is how many %2$s</string>
     <string name="fx_amount">Amount</string>
     <string name="fx_swap">Swap currencies</string>
-    <string name="fx_note">SumCtrl is offline, so it never looks up rates: type the rate from your bank or a receipt. It's kept for next time.</string>
+    <string name="fx_note">SumCtrl is offline, so it never looks up rates: type the rate from your bank or a receipt. It\'s kept for next time.</string>
 
     <string name="prog_type_in">Type in %1$s</string>
     <string name="prog_err_shift">Shift by 0 to 63 bits</string>
