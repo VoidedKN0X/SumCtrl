@@ -44,6 +44,22 @@
             </intent-filter>
         </activity>
 
+        <!-- "Calculate" in the text-selection menu of other apps (ACTION_PROCESS_TEXT). A small pop-up that works
+             out the selected sum; it shows nothing from behind the app lock and saves nothing. -->
+        <activity
+            android:name=".CalculateActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:label="@string/calculate_menu"
+            android:theme="@style/Theme.SumCtrl.Popup">
+            <intent-filter>
+                <action android:name="android.intent.action.PROCESS_TEXT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity>
+
         <!-- No downloadable emoji font: don't let androidx.emoji2 look one up from a font provider
              at start-up. Emoji are drawn with the phone's own emoji font instead. -->
         <provider

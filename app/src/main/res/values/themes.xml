@@ -7,4 +7,12 @@
         <item name="android:windowLightStatusBar">@bool/light_bars</item>
         <item name="android:windowLightNavigationBar">@bool/light_bars</item>
     </style>
+
+    <!-- The "Calculate" pop-up: see-through, the dimmed backdrop and the card are drawn by the app. -->
+    <style name="Theme.SumCtrl.Popup" parent="Theme.SumCtrl">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
+    </style>
 </resources>

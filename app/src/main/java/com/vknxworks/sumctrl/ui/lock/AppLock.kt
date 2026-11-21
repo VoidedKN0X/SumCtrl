@@ -145,8 +145,24 @@ object AppLock {
     /** The current trip away was started by the app itself. */
     private var exemptTrip = false
 
+    /**
+     * The "Calculate" pop-up from another app's text selection is opening. It shows nothing from behind the
+     * lock, so it must not count as coming back to SumCtrl: the time away keeps running from when you really
+     * left, and closing the pop-up doesn't restart it.
+     */
+    private var sideTrip = false
+
+    fun startSideTrip() {
+        sideTrip = true
+    }
+
     fun onBackground(enabled: Boolean, timeoutMillis: Long) {
         if (authenticating) return
+        if (sideTrip) {
+            sideTrip = false
+            // Already away since leaving SumCtrl itself: keep that time.
+            if (backgroundAt > 0) return
+        }
         backgroundAt = SystemClock.elapsedRealtime()
         // Only right after the app opened something itself; leaving later still counts.
         exemptTrip = expectReturnAt > 0 && backgroundAt - expectReturnAt < 5_000
@@ -156,6 +172,15 @@ object AppLock {
     }
 
     fun onForeground(enabled: Boolean, timeoutMillis: Long) {
+        if (sideTrip) {
+            // Only the pop-up came to the front: still lock once the time away has run out, but keep counting.
+            val away = backgroundAt
+            if (enabled && unlocked && away > 0 && timeoutMillis >= 0) {
+                val limit = if (exemptTrip) maxOf(timeoutMillis, EXEMPT_TRIP_MAX) else timeoutMillis
+                if (SystemClock.elapsedRealtime() - away >= limit) lock()
+            }
+            return
+        }
         val since = backgroundAt
         val exempt = exemptTrip
         backgroundAt = 0L

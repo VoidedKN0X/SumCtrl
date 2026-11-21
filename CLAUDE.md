@@ -6,7 +6,9 @@ Offline calculator, unit converter and work tools in the VKNXWorks Ctrl series. 
 
 - `data/calc/Engine.kt`: the expression engine. An expression is a list of keypad tokens; arithmetic is `BigDecimal` (DECIMAL128), functions go through `Double`. Pure Kotlin, no Android imports, so it can be tested with plain `kotlinc`.
 - `data/calc/Editor.kt`: `CalcState`, the immutable keypad state machine (what each key does to the line).
-- `data/convert/Units.kt`: converter categories and units. `data/tools/WorkMath.kt`: VAT, discount, margin, instalments, percentages.
+- `data/calc/Render.kt`: keys to display text, with where each key starts (cursor taps). `data/calc/Programmer.kt`: the 64-bit programmer engine (`ProgState`). `data/calc/TextExpr.kt`: reads a sum selected in another app (`CalculateActivity`, ACTION_PROCESS_TEXT).
+- `data/convert/Units.kt`: converter categories and units. `data/tools/WorkMath.kt`: VAT, discount, margin, instalments, percentages, tip, date difference, loan table, currency.
+- `data/Values.kt`: memory and named values (`values.json`, sealed like the history). `data/HistoryCsv.kt`: CSV export.
 - `data/NumFmt.kt`: all number formatting and parsing (decimal separator, grouping, currency).
 
 ## Hard rules
@@ -24,7 +26,11 @@ Offline calculator, unit converter and work tools in the VKNXWorks Ctrl series. 
 - `HistoryRepository` accepts both sealed and ordinary files (`SealedFile.isSealed`). Without a data key it reads and writes the ordinary file as before. All of it runs on `Dispatchers.IO`; nothing asks the Keystore on the main thread.
 - An ordinary file only becomes a sealed one through `SealedFile.sealInPlace` (temp file, sync, read back, compare, atomic rename). Never replace an existing `data.key`, and never create a Keystore key on the decrypt path (`KeystoreAes.existing`).
 - A sealed history that can't be opened is never overwritten: it is renamed to `history.json.unreadable`, a new history starts (`HistoryRepository.setAside` drives the note in the History sheet), and it is merged back when it opens at a later start. Only `clear()` deletes it.
-- There are no unit tests in this app (no test source set), so none were added for this.
+- `values.json` (memory and named values) follows exactly the same rules, with `values.json.unreadable` for a file that can't be opened.
+
+## Tests
+
+`app/src/test` has JUnit 4 tests for the pure logic in `data/` (no Android). CI doesn't run them yet; run them with `./gradlew testDebugUnitTest`, or compile them with plain `kotlinc` together with the files they test.
 
 ## Build toolchain
 

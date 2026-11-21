@@ -11,6 +11,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -44,6 +45,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -65,6 +71,8 @@ import com.vknxworks.sumctrl.data.NumFmt
 import com.vknxworks.sumctrl.data.calc.CalcError
 import com.vknxworks.sumctrl.data.calc.CalcState
 import com.vknxworks.sumctrl.data.calc.Engine
+import com.vknxworks.sumctrl.data.calc.Render
+import com.vknxworks.sumctrl.data.calc.RenderedLine
 import com.vknxworks.sumctrl.ui.components.CtrlSquareButton
 import com.vknxworks.sumctrl.ui.components.CtrlWordmark
 import com.vknxworks.sumctrl.ui.components.LocalBottomClearance
@@ -90,6 +98,8 @@ fun CalcScreen() {
     val state by c.calc.collectAsStateWithLifecycle()
     val fmt = rememberNumFmt()
     var historyOpen by rememberSaveable { mutableStateOf(false) }
+    var valuesOpen by rememberSaveable { mutableStateOf(false) }
+    val stored by c.values.state.collectAsStateWithLifecycle()
     var inverse by rememberSaveable { mutableStateOf(false) }
 
     // The key handlers are kept across recompositions (they read the newest settings through this), so the
@@ -99,7 +109,34 @@ fun CalcScreen() {
     val press = remember<((CalcState) -> CalcState) -> Unit>(c, view) {
         { change ->
             if (currentSettings.value.keyHaptics) view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-            c.calc.value = change(c.calc.value)
+            // At the cursor when the sum was tapped to move it, otherwise at the end.
+            c.calc.value = c.calc.value.edit(change)
+        }
+    }
+
+    // AC clears the whole line, wherever the cursor is.
+    val clearAll = remember<() -> Unit>(c, view) {
+        {
+            if (currentSettings.value.keyHaptics) view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+            c.calc.value = c.calc.value.clear()
+        }
+    }
+
+    val onMemory = remember<(MemoryKey) -> Unit>(c, view) {
+        { key ->
+            val now = currentSettings.value
+            if (now.keyHaptics) view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+            when (key) {
+                MemoryKey.CLEAR -> c.values.clearMemory()
+                MemoryKey.RECALL -> {
+                    if (c.values.memory != null) c.calc.value = c.calc.value.edit { it.constant(Engine.MEMORY) }
+                }
+                MemoryKey.ADD, MemoryKey.SUBTRACT -> {
+                    val v = c.calc.value.currentValue(now.degrees, c.values.lookup())
+                    if (v != null) c.values.addToMemory(if (key == MemoryKey.ADD) v else v.negate())
+                }
+            }
+            Unit
         }
     }
 
@@ -107,7 +144,7 @@ fun CalcScreen() {
         {
             val now = currentSettings.value
             if (now.keyHaptics) view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-            val (next, result) = c.calc.value.equals(now.degrees)
+            val (next, result) = c.calc.value.equals(now.degrees, c.values.lookup())
             if (result != null && now.saveHistory) c.history.add(c.calc.value.tokens, result.toPlainString())
             c.calc.value = next
         }
@@ -116,7 +153,8 @@ fun CalcScreen() {
     fun setDegrees(on: Boolean) = c.appScope.launch { c.settings.update { it.copy(degrees = on) } }
     fun setScientific(on: Boolean) = c.appScope.launch { c.settings.update { it.copy(scientific = on) } }
 
-    val preview = remember(state, settings.degrees) { state.preview(settings.degrees) }
+    val values = remember(stored) { c.values.lookup(stored) }
+    val preview = remember(state, settings.degrees, values) { state.preview(settings.degrees, values) }
 
     BoxWithConstraints(Modifier.fillMaxSize().statusBarsPadding()) {
         // Read here: the Column below is not a BoxWithConstraints scope.
@@ -147,19 +185,35 @@ fun CalcScreen() {
                 showSciToggle = !landscape,
                 onToggleDegrees = { setDegrees(!settings.degrees) },
                 onToggleScientific = { setScientific(!settings.scientific) },
+                memory = stored.memory != null,
                 onBackspace = { press { it.backspace() } },
-                onClear = { press { it.clear() } },
+                onClear = clearAll,
+                onMoveCursor = { position ->
+                    if (currentSettings.value.keyHaptics) view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                    c.calc.value = c.calc.value.moveCursor(position)
+                },
                 onCopy = { text -> copy(context, text) },
                 modifier = Modifier.weight(1f).fillMaxWidth(),
             )
 
             // Built once per number format; only the scientific rows change with INV.
-            val keys = remember(fmt, press, onEqualsPressed) {
+            val memoryLabels = listOf(
+                stringResource(R.string.memory_clear),
+                stringResource(R.string.memory_recall),
+                stringResource(R.string.memory_add),
+                stringResource(R.string.memory_subtract),
+                stringResource(R.string.values_title),
+            )
+            val keys = remember(fmt, press, onEqualsPressed, clearAll, onMemory, memoryLabels) {
                 Keys(
+                    memoryLabels = memoryLabels,
                     fmt = fmt,
                     onInverse = { inverse = !inverse },
                     press = press,
                     onEquals = onEqualsPressed,
+                    onClearAll = clearAll,
+                    onMemory = onMemory,
+                    onValues = { valuesOpen = true },
                 )
             }
             val scientificKeys = remember(keys, inverse) { keys.scientific(inverse) }
@@ -172,12 +226,13 @@ fun CalcScreen() {
                     Modifier.fillMaxWidth().padding(start = Gutter, end = Gutter, bottom = clearance + 12.dp),
                     horizontalArrangement = Arrangement.spacedBy(gap * 2),
                 ) {
-                    KeyGrid(scientificKeys, keyH * 5 / 3 + gap * 2 / 3, gap, Modifier.weight(1f), small = true)
+                    // Four rows of scientific keys as tall as the five rows of the keypad.
+                    KeyGrid(scientificKeys, keyH * 5 / 4 + gap / 4, gap, Modifier.weight(1f), small = true)
                     KeyGrid(keys.main, keyH, gap, Modifier.weight(1.2f))
                 }
             } else {
                 val keyW = (boxWidth - Gutter * 2 - gap * 3) / 4
-                val sciRows = if (settings.scientific) 3 else 0
+                val sciRows = if (settings.scientific) 4 else 0
                 val avail = boxHeight - 60.dp - 150.dp - clearance - 12.dp
                 val units = 5f + sciRows * 0.62f
                 val gaps = gap * (4 + sciRows)
@@ -202,12 +257,26 @@ fun CalcScreen() {
             enabled = settings.saveHistory,
             onDismiss = { historyOpen = false },
             onPick = { v ->
-                c.calc.value = c.calc.value.insert(v)
+                c.calc.value = c.calc.value.edit { it.insert(v) }
                 historyOpen = false
             },
         )
     }
+
+    if (valuesOpen) {
+        ValuesSheet(
+            fmt = fmt,
+            current = state.currentValue(settings.degrees, values),
+            onDismiss = { valuesOpen = false },
+            onPick = { name ->
+                c.calc.value = c.calc.value.edit { it.constant(Engine.variableToken(name)) }
+                valuesOpen = false
+            },
+        )
+    }
 }
+
+enum class MemoryKey { CLEAR, RECALL, ADD, SUBTRACT }
 
 private fun copy(context: android.content.Context, text: String) {
     val cm = context.getSystemService(ClipboardManager::class.java) ?: return
@@ -225,15 +294,22 @@ private fun Display(
     degrees: Boolean,
     scientific: Boolean,
     showSciToggle: Boolean,
+    memory: Boolean,
     onToggleDegrees: () -> Unit,
     onToggleScientific: () -> Unit,
     onBackspace: () -> Unit,
     onClear: () -> Unit,
+    onMoveCursor: (Int) -> Unit,
     onCopy: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val main = if (state.evaluated) fmt.result(state.ans) else renderTokens(state.tokens, fmt)
+    val line: RenderedLine? = remember(state.tokens, state.evaluated, fmt) { if (state.evaluated) null else Render.line(state.tokens, fmt) }
+    val main = line?.text ?: fmt.result(state.ans)
     val above = if (state.evaluated && state.previous.isNotEmpty()) renderTokens(state.previous, fmt) + " =" else null
+    var layout by remember { mutableStateOf<TextLayoutResult?>(null) }
+    val cursorColor = CtrlColors.Accent
+    val cursorLabel = stringResource(R.string.cursor_move)
+    val memoryInUse = stringResource(R.string.memory_in_use)
     val copyText = when {
         state.evaluated -> plain(state.ans, fmt)
         preview != null -> plain(preview, fmt)
@@ -277,6 +353,8 @@ private fun Display(
                 main.length <= 24 -> 30.sp
                 else -> 26.sp
             }
+            // Tap the sum to put the cursor there; the next key goes in at the cursor. Tapping a result makes it
+            // editable again.
             Text(
                 main.ifEmpty { "0" },
                 style = CtrlType.Readout.copy(fontSize = size, lineHeight = size * 1.15f),
@@ -284,8 +362,40 @@ private fun Display(
                 textAlign = TextAlign.End,
                 maxLines = 4,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.semantics { contentDescription = main.ifEmpty { "0" } },
+                onTextLayout = { layout = it },
+                modifier = Modifier
+                    .semantics { contentDescription = main.ifEmpty { "0" } }
+                    .pointerInput(line, state.evaluated, state.tokens.size) {
+                        detectTapGestures(onTap = { pos ->
+                            val l = layout
+                            when {
+                                main.isEmpty() -> Unit
+                                line == null -> onMoveCursor(state.tokens.size)
+                                l != null -> onMoveCursor(line.positionAt(l.getOffsetForPosition(pos)))
+                                else -> Unit
+                            }
+                        })
+                    }
+                    .drawWithContent {
+                        drawContent()
+                        val l = layout
+                        val at = state.cursor
+                        if (line != null && at != null && l != null) {
+                            val offset = line.offsetOf(at).coerceIn(0, l.layoutInput.text.length)
+                            val r = l.getCursorRect(offset)
+                            drawRect(cursorColor, Offset(r.left - 1.5.dp.toPx(), r.top), Size(3.dp.toPx(), r.height))
+                        }
+                    },
             )
+            if (state.cursor != null) {
+                Text(
+                    cursorLabel,
+                    style = CtrlType.Label,
+                    color = CtrlColors.Muted,
+                    textAlign = TextAlign.End,
+                    maxLines = 1,
+                )
+            }
             val error = state.error
             val below = when {
                 error != null -> stringResource(errorText(error))
@@ -315,6 +425,14 @@ private fun Display(
                     onToggleScientific,
                     icon = if (scientific) Icons.Outlined.ExpandMore else Icons.Outlined.ExpandLess,
                     active = scientific,
+                )
+            }
+            if (memory) {
+                Text(
+                    "M",
+                    style = CtrlType.LabelStrong,
+                    color = CtrlColors.AccentText,
+                    modifier = Modifier.semantics { contentDescription = memoryInUse },
                 )
             }
             Spacer(Modifier.weight(1f))
@@ -356,40 +474,15 @@ private fun errorText(e: CalcError) = when (e) {
     CalcError.DIV_ZERO -> R.string.err_div_zero
     CalcError.DOMAIN -> R.string.err_domain
     CalcError.TOO_BIG -> R.string.err_too_big
+    CalcError.UNKNOWN_VALUE -> R.string.err_unknown_value
 }
 
 /** A number for the clipboard: the rounded result with the chosen decimal separator, no grouping. */
 private fun plain(v: BigDecimal, fmt: NumFmt): String =
     Engine.rounded(v).toPlainString().replace('.', fmt.decimal)
 
-/** The typed keys as text: numbers grouped, operators spaced, inverse functions with ⁻¹. */
-fun renderTokens(tokens: List<String>, fmt: NumFmt): String {
-    val sb = StringBuilder()
-    var i = 0
-    while (i < tokens.size) {
-        val t = tokens[i]
-        if (Engine.isNumberPart(t)) {
-            val run = StringBuilder()
-            while (i < tokens.size && Engine.isNumberPart(tokens[i])) run.append(tokens[i++])
-            sb.append(fmt.grouped(run.toString()))
-            continue
-        }
-        val prev = tokens.getOrNull(i - 1)
-        val unary = t == Engine.MINUS && (prev == null || prev in Engine.BINARY || prev == Engine.OPEN || Engine.isFunction(prev))
-        sb.append(
-            when {
-                t == Engine.POWER -> "^"
-                t in Engine.BINARY && !unary -> " $t "
-                t == "asin(" -> "sin⁻¹("
-                t == "acos(" -> "cos⁻¹("
-                t == "atan(" -> "tan⁻¹("
-                else -> t
-            },
-        )
-        i++
-    }
-    return sb.toString()
-}
+/** The typed keys as text: numbers grouped, operators spaced, inverse functions with ⁻¹, values by name. */
+fun renderTokens(tokens: List<String>, fmt: NumFmt): String = Render.tokens(tokens, fmt)
 
 // ---------- Keys ----------
 
@@ -405,17 +498,21 @@ private class Key(
 
 /** Every key, wired to the calculator. */
 private class Keys(
+    private val memoryLabels: List<String>,
     fmt: NumFmt,
     private val onInverse: () -> Unit,
     private val press: ((CalcState) -> CalcState) -> Unit,
     onEquals: () -> Unit,
+    onClearAll: () -> Unit,
+    private val onMemory: (MemoryKey) -> Unit,
+    private val onValues: () -> Unit,
 ) {
     private fun num(d: String) = Key(d, KeyKind.NUMBER) { press { it.digit(d) } }
     private fun op(o: String) = Key(o, KeyKind.OPERATOR) { press { it.operator(o) } }
 
     val main: List<List<Key>> = listOf(
         listOf(
-            Key("AC", KeyKind.CLEAR) { press { it.clear() } },
+            Key("AC", KeyKind.CLEAR, onClick = onClearAll),
             Key("( )", KeyKind.OPERATOR) { press { it.bracket() } },
             Key("%", KeyKind.OPERATOR) { press { it.postfix(Engine.PERCENT) } },
             op(Engine.DIVIDE),
@@ -474,6 +571,14 @@ private class Keys(
             Key("!", KeyKind.FUNCTION) { press { it.postfix(Engine.FACTORIAL) } },
             Key("e", KeyKind.FUNCTION) { press { it.constant(Engine.E) } },
             Key("Ans", KeyKind.FUNCTION) { press { it.constant(Engine.ANS) } },
+        ),
+        // Memory and named values.
+        listOf(
+            Key("MC", KeyKind.FUNCTION, description = memoryLabels[0]) { onMemory(MemoryKey.CLEAR) },
+            Key("MR", KeyKind.FUNCTION, description = memoryLabels[1]) { onMemory(MemoryKey.RECALL) },
+            Key("M+", KeyKind.FUNCTION, description = memoryLabels[2]) { onMemory(MemoryKey.ADD) },
+            Key("M−", KeyKind.FUNCTION, description = memoryLabels[3]) { onMemory(MemoryKey.SUBTRACT) },
+            Key("x=", KeyKind.FUNCTION, description = memoryLabels[4], onClick = onValues),
         ),
     )
 

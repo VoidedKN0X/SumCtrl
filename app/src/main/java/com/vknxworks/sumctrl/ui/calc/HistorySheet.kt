@@ -1,6 +1,27 @@
 package com.vknxworks.sumctrl.ui.calc
 
+import android.net.Uri
 import android.text.format.DateUtils
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.outlined.EditNote
+import androidx.compose.material.icons.outlined.FileDownload
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import com.vknxworks.sumctrl.data.HistoryCsv
+import com.vknxworks.sumctrl.data.HistoryRepository
+import com.vknxworks.sumctrl.ui.components.CtrlAlertDialog
+import com.vknxworks.sumctrl.ui.components.CtrlTextField
+import com.vknxworks.sumctrl.ui.lock.AppLock
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.time.LocalDate
+import java.time.ZoneId
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,6 +30,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -53,6 +75,31 @@ fun HistorySheet(fmt: NumFmt, enabled: Boolean, onDismiss: () -> Unit, onPick: (
     val entries by c.history.entries.collectAsStateWithLifecycle()
     val setAside by c.history.setAside.collectAsStateWithLifecycle()
     var confirmClear by remember { mutableStateOf(false) }
+    var editing by remember { mutableStateOf<HistoryEntry?>(null) }
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val header = listOf(
+        stringResource(R.string.csv_time),
+        stringResource(R.string.csv_sum),
+        stringResource(R.string.csv_result),
+        stringResource(R.string.csv_note),
+    )
+
+    // CSV export: the whole history, oldest first, to a file you pick. It's an ordinary file there, not encrypted.
+    val export = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri: Uri? ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        val list = c.history.entries.value
+        scope.launch {
+            val ok = runCatching {
+                val text = HistoryCsv.write(list, ZoneId.systemDefault(), header)
+                withContext(Dispatchers.IO) {
+                    context.contentResolver.openOutputStream(uri, "wt")?.use { it.write(text.toByteArray(Charsets.UTF_8)) }
+                        ?: error("no stream")
+                }
+            }.isSuccess
+            Toast.makeText(context, if (ok) R.string.csv_saved else R.string.csv_failed, Toast.LENGTH_LONG).show()
+        }
+    }
 
     CtrlBottomSheet(onDismissRequest = onDismiss) {
         Row(
@@ -61,6 +108,11 @@ fun HistorySheet(fmt: NumFmt, enabled: Boolean, onDismiss: () -> Unit, onPick: (
         ) {
             Text(stringResource(R.string.history), style = MaterialTheme.typography.headlineSmall, modifier = Modifier.weight(1f))
             if (entries.isNotEmpty()) {
+                CtrlSquareButton(Icons.Outlined.FileDownload, stringResource(R.string.csv_export), onClick = {
+                    AppLock.expectReturn()
+                    export.launch("sumctrl-history-${LocalDate.now()}.csv")
+                })
+                androidx.compose.foundation.layout.Spacer(Modifier.width(8.dp))
                 CtrlSquareButton(Icons.Outlined.DeleteSweep, stringResource(R.string.history_clear), onClick = { confirmClear = true })
             }
         }
@@ -79,10 +131,27 @@ fun HistorySheet(fmt: NumFmt, enabled: Boolean, onDismiss: () -> Unit, onPick: (
             )
             else -> LazyColumn(Modifier.fillMaxWidth().navigationBarsPadding(), contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 24.dp)) {
                 items(entries, key = { it.id }) { e ->
-                    HistoryRow(e, fmt, onPick = { e.result.toBigDecimalOrNull()?.let(onPick) }, onRemove = { c.history.remove(e.id) })
+                    HistoryRow(
+                        e,
+                        fmt,
+                        onPick = { e.result.toBigDecimalOrNull()?.let(onPick) },
+                        onNote = { editing = e },
+                        onRemove = { c.history.remove(e.id) },
+                    )
                 }
             }
         }
+    }
+
+    editing?.let { e ->
+        NoteDialog(
+            initial = e.note.orEmpty(),
+            onDismiss = { editing = null },
+            onSave = { note ->
+                c.history.setNote(e.id, note)
+                editing = null
+            },
+        )
     }
 
     if (confirmClear) {
@@ -100,7 +169,7 @@ fun HistorySheet(fmt: NumFmt, enabled: Boolean, onDismiss: () -> Unit, onPick: (
 }
 
 @Composable
-private fun HistoryRow(e: HistoryEntry, fmt: NumFmt, onPick: () -> Unit, onRemove: () -> Unit) {
+private fun HistoryRow(e: HistoryEntry, fmt: NumFmt, onPick: () -> Unit, onNote: () -> Unit, onRemove: () -> Unit) {
     val result = e.result.toBigDecimalOrNull()?.let { fmt.result(it) } ?: e.result
     val whenText = DateUtils.getRelativeTimeSpanString(e.time, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS).toString()
     Row(
@@ -121,8 +190,40 @@ private fun HistoryRow(e: HistoryEntry, fmt: NumFmt, onPick: () -> Unit, onRemov
                 overflow = TextOverflow.Ellipsis,
             )
             Text(result, style = CtrlType.Readout.copy(fontSize = 26.sp, lineHeight = 32.sp), color = CtrlColors.Text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            if (!e.note.isNullOrBlank()) {
+                Text(e.note, style = MaterialTheme.typography.bodyMedium, color = CtrlColors.AccentText, textAlign = TextAlign.End, maxLines = 3, overflow = TextOverflow.Ellipsis)
+            }
             Text(whenText, style = CtrlType.Label, color = CtrlColors.Inactive)
         }
+        CtrlSquareButton(
+            Icons.Outlined.EditNote,
+            stringResource(if (e.note.isNullOrBlank()) R.string.history_note_add else R.string.history_note_edit),
+            onClick = onNote,
+            size = 40.dp,
+            tint = CtrlColors.Muted,
+        )
         CtrlSquareButton(Icons.Outlined.Close, stringResource(R.string.history_remove), onClick = onRemove, size = 40.dp, tint = CtrlColors.Muted)
     }
+}
+
+/** Adds, changes or (left empty) removes the note on a sum. */
+@Composable
+private fun NoteDialog(initial: String, onDismiss: () -> Unit, onSave: (String) -> Unit) {
+    var text by remember { mutableStateOf(initial) }
+    CtrlAlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.history_note_title), style = MaterialTheme.typography.titleLarge) },
+        text = {
+            CtrlTextField(
+                value = text,
+                onValueChange = { text = it.take(HistoryRepository.NOTE_MAX) },
+                minLines = 2,
+                placeholder = { Text(stringResource(R.string.history_note_hint)) },
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Default),
+                modifier = Modifier.fillMaxWidth(),
+            )
+        },
+        confirmButton = { TextButton(onClick = { onSave(text) }) { Text(stringResource(R.string.save)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel), color = CtrlColors.Text) } },
+    )
 }

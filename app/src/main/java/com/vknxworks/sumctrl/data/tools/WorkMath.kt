@@ -2,6 +2,11 @@ package com.vknxworks.sumctrl.data.tools
 
 import java.math.BigDecimal
 import java.math.MathContext
+import java.math.RoundingMode
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.Period
+import java.time.temporal.ChronoUnit
 
 private val MC = MathContext.DECIMAL128
 private val HUNDRED = BigDecimal(100)
@@ -92,4 +97,106 @@ object WorkMath {
     /** Change from [from] to [to] in percent; null when [from] is zero. */
     fun change(from: BigDecimal, to: BigDecimal): BigDecimal? =
         if (from.signum() == 0) null else to.subtract(from).divide(from.abs(), MC).multiply(HUNDRED)
+
+    // ---------- Tip and split ----------
+
+    /**
+     * A bill with [tipPercent] tip on top, shared by [people]. [perPerson] is the exact share; [perPersonRounded]
+     * is that share rounded up to the cent, so that everyone paying it covers the bill, and [paidRounded] is
+     * what that adds up to. Null for fewer than one person.
+     */
+    data class Tip(
+        val tip: BigDecimal,
+        val total: BigDecimal,
+        val perPerson: BigDecimal,
+        val perPersonRounded: BigDecimal,
+        val paidRounded: BigDecimal,
+    )
+
+    fun tip(bill: BigDecimal, tipPercent: BigDecimal, people: Int): Tip? {
+        if (people < 1) return null
+        val tip = bill.multiply(pct(tipPercent), MC)
+        val total = bill.add(tip, MC)
+        val n = BigDecimal(people)
+        val per = total.divide(n, MC)
+        val perRounded = per.setScale(2, RoundingMode.CEILING)
+        return Tip(tip, total, per, perRounded, perRounded.multiply(n))
+    }
+
+    // ---------- Date difference ----------
+
+    /**
+     * From [from] to [to]: [days] in between (negative when [to] is earlier), the same as whole [weeks] and
+     * [weekDays] left over, as a calendar [period] (years, months, days), and the [workdays] (Monday to Friday)
+     * among the days counted: from the earlier date up to, but not including, the later one.
+     */
+    data class DateDiff(val days: Long, val weeks: Long, val weekDays: Long, val period: Period, val workdays: Long)
+
+    fun dateDiff(from: LocalDate, to: LocalDate): DateDiff {
+        val days = ChronoUnit.DAYS.between(from, to)
+        val start = if (days >= 0) from else to
+        val end = if (days >= 0) to else from
+        val span = kotlin.math.abs(days)
+        // Whole weeks have five workdays each; then the days left over one by one.
+        var workdays = (span / 7) * 5
+        var d = start.plusDays((span / 7) * 7)
+        while (d.isBefore(end)) {
+            if (d.dayOfWeek != DayOfWeek.SATURDAY && d.dayOfWeek != DayOfWeek.SUNDAY) workdays++
+            d = d.plusDays(1)
+        }
+        val period = Period.between(start, end)
+        return DateDiff(days, span / 7, span % 7, period, workdays)
+    }
+
+    // ---------- Loan table ----------
+
+    data class LoanRow(val month: Int, val payment: BigDecimal, val interest: BigDecimal, val principal: BigDecimal, val balance: BigDecimal)
+
+    data class Loan(val payment: BigDecimal, val rows: List<LoanRow>, val totalPaid: BigDecimal, val totalInterest: BigDecimal)
+
+    /** The most months the loan table lists (50 years). */
+    const val MAX_LOAN_MONTHS = 600
+
+    /**
+     * A loan of [amount] paid back over [months] with fixed monthly payments at a nominal yearly rate of
+     * [yearlyRate] percent (the rate divided by 12 each month), worked out in cents as a bank statement does:
+     * the payment is rounded to the cent, each month's interest is rounded to the cent, and the last payment
+     * takes whatever is left so the balance ends at exactly zero. Null for no months, more than
+     * [MAX_LOAN_MONTHS], a negative amount or a negative rate.
+     */
+    fun loan(amount: BigDecimal, yearlyRate: BigDecimal, months: Int): Loan? {
+        if (months < 1 || months > MAX_LOAN_MONTHS || amount.signum() < 0 || yearlyRate.signum() < 0) return null
+        val principal = amount.setScale(2, RoundingMode.HALF_UP)
+        val r = yearlyRate.divide(BigDecimal(1200), MC)
+        val exactPayment = if (r.signum() == 0) {
+            principal.divide(BigDecimal(months), MC)
+        } else {
+            val growth = BigDecimal.ONE.add(r).pow(-months, MC)
+            principal.multiply(r, MC).divide(BigDecimal.ONE.subtract(growth), MC)
+        }
+        val payment = exactPayment.setScale(2, RoundingMode.HALF_UP)
+        val rows = ArrayList<LoanRow>(months)
+        var balance = principal
+        var paid = BigDecimal.ZERO
+        var interestTotal = BigDecimal.ZERO
+        for (m in 1..months) {
+            val interest = balance.multiply(r, MC).setScale(2, RoundingMode.HALF_UP)
+            var toPrincipal = payment.subtract(interest)
+            if (m == months || toPrincipal > balance) toPrincipal = balance
+            val pay = toPrincipal.add(interest)
+            balance = balance.subtract(toPrincipal)
+            paid = paid.add(pay)
+            interestTotal = interestTotal.add(interest)
+            rows += LoanRow(m, pay, interest, toPrincipal, balance)
+        }
+        return Loan(payment, rows, paid, interestTotal)
+    }
+
+    // ---------- Currency with your own rate ----------
+
+    /** [amount] at [rate] (one unit of the first currency is [rate] of the second). */
+    fun convert(amount: BigDecimal, rate: BigDecimal): BigDecimal = amount.multiply(rate, MC)
+
+    /** The rate the other way round (1 ÷ [rate]); null for a zero rate. */
+    fun inverseRate(rate: BigDecimal): BigDecimal? = if (rate.signum() == 0) null else BigDecimal.ONE.divide(rate, MC)
 }

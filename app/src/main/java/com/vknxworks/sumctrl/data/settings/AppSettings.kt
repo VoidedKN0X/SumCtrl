@@ -54,6 +54,10 @@ data class AppSettings(
     val currency: String = "EUR",
     /** VAT rate the VAT tool starts with, in percent. */
     val vatRate: String = "21",
+    /** Currency tool: the currency you convert from, the one you convert to, and the rate you typed (1 from = rate to). */
+    val fxFrom: String = "EUR",
+    val fxTo: String = "USD",
+    val fxRate: String = "",
     /** App lock: when it asks again after SumCtrl was in the background. */
     val lockTimeout: LockTimeout = LockTimeout.IMMEDIATELY,
     /** "Hide in screenshots": FLAG_SECURE on the app's windows (screenshots, recordings and the Recents preview). */
@@ -72,6 +76,9 @@ class SettingsRepository(private val context: Context, scope: CoroutineScope) {
         val group = booleanPreferencesKey("group_thousands")
         val currency = stringPreferencesKey("currency")
         val vatRate = stringPreferencesKey("vat_rate")
+        val fxFrom = stringPreferencesKey("fx_from")
+        val fxTo = stringPreferencesKey("fx_to")
+        val fxRate = stringPreferencesKey("fx_rate")
         val lockTimeout = stringPreferencesKey("lock_timeout")
         val hideScreenshots = booleanPreferencesKey("hide_screenshots")
         val hideRecents = booleanPreferencesKey("hide_recents")
@@ -112,6 +119,9 @@ class SettingsRepository(private val context: Context, scope: CoroutineScope) {
         groupThousands = this[K.group] ?: true,
         currency = this[K.currency]?.takeIf { it.length == 3 } ?: "EUR",
         vatRate = this[K.vatRate]?.takeIf { it.isNotBlank() } ?: "21",
+        fxFrom = this[K.fxFrom]?.takeIf { it.length == 3 } ?: "EUR",
+        fxTo = this[K.fxTo]?.takeIf { it.length == 3 } ?: "USD",
+        fxRate = this[K.fxRate] ?: "",
         lockTimeout = enumOr(this[K.lockTimeout], LockTimeout.IMMEDIATELY),
         hideScreenshots = this[K.hideScreenshots] ?: false,
         hideRecents = this[K.hideRecents] ?: false,
@@ -130,6 +140,9 @@ class SettingsRepository(private val context: Context, scope: CoroutineScope) {
                 p[K.group] = s.groupThousands
                 p[K.currency] = s.currency
                 p[K.vatRate] = s.vatRate
+                p[K.fxFrom] = s.fxFrom
+                p[K.fxTo] = s.fxTo
+                p[K.fxRate] = s.fxRate
                 p[K.lockTimeout] = s.lockTimeout.name
                 p[K.hideScreenshots] = s.hideScreenshots
                 p[K.hideRecents] = s.hideRecents

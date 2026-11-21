@@ -2,6 +2,7 @@ package com.vknxworks.sumctrl
 
 import android.content.Context
 import com.vknxworks.sumctrl.data.HistoryRepository
+import com.vknxworks.sumctrl.data.ValuesRepository
 import com.vknxworks.sumctrl.data.calc.CalcState
 import com.vknxworks.sumctrl.data.crypto.DataKeyStore
 import com.vknxworks.sumctrl.data.crypto.KeystoreWrapper
@@ -32,6 +33,9 @@ class AppContainer(val context: Context) {
     private val dataKeys = DataKeyStore(context.filesDir, KeystoreWrapper("sumctrl_data_at_rest"))
     val history = HistoryRepository(context, appScope, dataKeys)
 
+    /** The memory and the named values, encrypted at rest with the same key as the history. */
+    val values = ValuesRepository(context, appScope, dataKeys)
+
     /** The calculator's line. Kept here so it survives switching tabs and rotating the phone. */
     val calc = MutableStateFlow(CalcState())
 
@@ -52,10 +56,11 @@ class AppContainer(val context: Context) {
 
     /**
      * "Forgot PIN?": the PIN can't be recovered, and skipping it would make the lock pointless, so the history,
-     * the current sum and every setting are deleted and the lock turned off.
+     * the memory and named values, the current sum and every setting are deleted and the lock turned off.
      */
     suspend fun forgetEverything() {
         history.clear()
+        values.clear()
         calc.value = CalcState()
         settings.update { AppSettings() }
         vault.disable()

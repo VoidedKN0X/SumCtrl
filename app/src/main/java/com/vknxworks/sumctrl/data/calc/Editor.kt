@@ -21,6 +21,11 @@ data class CalcState(
     val error: CalcError? = null,
     /** The sum the shown result came from, shown small above it after "=". */
     val previous: List<String> = emptyList(),
+    /**
+     * Where the next key goes, as a position in [tokens] (0 is before the first key). Null is the end of the
+     * line, which is where typing goes unless the sum was tapped to move the cursor.
+     */
+    val cursor: Int? = null,
 ) {
     private val last: String? get() = tokens.lastOrNull()
 
@@ -165,11 +170,51 @@ data class CalcState(
     /** AC: clears the line (the last answer stays for "Ans"). */
     fun clear(): CalcState = CalcState(ans = ans)
 
+    /**
+     * Applies a key ([change], one of the functions above) at the cursor: to the part of the line before it,
+     * with the rest put back after it. Without a cursor it's simply [change] on the whole line. AC is not a key
+     * for this: call [clear] directly.
+     */
+    fun edit(change: (CalcState) -> CalcState): CalcState {
+        val at = cursor ?: return change(this)
+        val tail = tokens.subList(at.coerceIn(0, tokens.size), tokens.size)
+        val head = copy(tokens = tokens.subList(0, at.coerceIn(0, tokens.size)), cursor = null)
+        val r = change(head)
+        if (r.evaluated) return r
+        return r.copy(tokens = r.tokens + tail, cursor = if (tail.isEmpty()) null else r.tokens.size)
+    }
+
+    /**
+     * Puts the cursor before the key at [position] (the end of the line for [tokens].size or more). A result
+     * becomes an editable line again, like after backspace.
+     */
+    fun moveCursor(position: Int): CalcState {
+        val base = if (evaluated) CalcState(tokens = tokens, ans = ans) else copy(error = null, previous = emptyList())
+        val p = position.coerceIn(0, base.tokens.size)
+        return base.copy(cursor = if (p >= base.tokens.size) null else p)
+    }
+
+    /**
+     * The number this line stands for right now, for the memory keys and for saving a named value: the result
+     * after "=", otherwise what the line works out to. Null when it isn't a complete sum.
+     */
+    fun currentValue(degrees: Boolean, values: Map<String, BigDecimal> = emptyMap()): BigDecimal? {
+        if (evaluated) return ans
+        if (tokens.isEmpty()) return null
+        return try {
+            Engine.evaluate(tokens, degrees, ans, values)
+        } catch (e: CalcException) {
+            null
+        } catch (e: ArithmeticException) {
+            null
+        }
+    }
+
     /** "=": the result, or an error. Returns the new state and the result when it worked. */
-    fun equals(degrees: Boolean): Pair<CalcState, BigDecimal?> {
+    fun equals(degrees: Boolean, values: Map<String, BigDecimal> = emptyMap()): Pair<CalcState, BigDecimal?> {
         if (tokens.isEmpty() || evaluated) return this to null
         return try {
-            val v = Engine.evaluate(tokens, degrees, ans)
+            val v = Engine.evaluate(tokens, degrees, ans, values)
             CalcState(tokens = Engine.tokensOf(v), evaluated = true, ans = v, previous = tokens) to v
         } catch (e: CalcException) {
             copy(error = e.error) to null
@@ -179,13 +224,13 @@ data class CalcState(
     }
 
     /** The live result under the line while typing, or null when the sum isn't complete or has no answer. */
-    fun preview(degrees: Boolean): BigDecimal? {
+    fun preview(degrees: Boolean, values: Map<String, BigDecimal> = emptyMap()): BigDecimal? {
         if (tokens.isEmpty() || evaluated) return null
         // A lone number is its own result; no preview needed.
         if (tokens.all { Engine.isNumberPart(it) || it == MINUS }) return null
         if (tokens.last() in Engine.BINARY) return null
         return try {
-            Engine.evaluate(tokens, degrees, ans)
+            Engine.evaluate(tokens, degrees, ans, values)
         } catch (e: CalcException) {
             null
         } catch (e: ArithmeticException) {

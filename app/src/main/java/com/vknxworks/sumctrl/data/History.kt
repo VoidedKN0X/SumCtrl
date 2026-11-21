@@ -11,19 +11,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import java.io.File
 
-/** One finished sum: the keys typed and the exact result (as a plain decimal string). */
-@Serializable
-data class HistoryEntry(
-    val id: Long,
-    val time: Long,
-    val tokens: List<String>,
-    val result: String,
-)
 
 /**
  * The calculator's history, kept in a JSON file in SumCtrl's private storage. Nothing leaves the phone;
@@ -76,6 +67,12 @@ class HistoryRepository(context: Context, private val scope: CoroutineScope, pri
     }
 
     fun remove(id: Long) = save(_entries.value.filterNot { it.id == id })
+
+    /** Sets or (with a blank [note]) removes the note on one sum. */
+    fun setNote(id: Long, note: String) {
+        val n = note.trim().take(NOTE_MAX).ifEmpty { null }
+        save(_entries.value.map { if (it.id == id) it.copy(note = n) else it })
+    }
 
     /** Deletes the history, and any earlier history that was kept aside because it couldn't be opened. */
     fun clear() = save(emptyList(), dropAside = true)
@@ -195,6 +192,7 @@ class HistoryRepository(context: Context, private val scope: CoroutineScope, pri
 
     companion object {
         const val MAX = 500
+        const val NOTE_MAX = 200
         private const val FILE = "history.json"
         private const val TMP = "history.json.tmp"
         private const val ASIDE = "history.json.unreadable"

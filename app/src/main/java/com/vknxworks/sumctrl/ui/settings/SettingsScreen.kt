@@ -162,9 +162,9 @@ private fun NumbersGroup(settings: AppSettings, set: ((AppSettings) -> AppSettin
 }
 
 /** Common currencies; amounts are only labelled with it, never converted. */
-private val CURRENCIES = listOf("EUR", "USD", "GBP", "CHF", "SEK", "NOK", "DKK", "PLN", "CZK", "HUF", "CAD", "AUD", "JPY")
+internal val CURRENCIES = listOf("EUR", "USD", "GBP", "CHF", "SEK", "NOK", "DKK", "PLN", "CZK", "HUF", "CAD", "AUD", "JPY")
 
-private fun currencyLabel(code: String): String =
+internal fun currencyLabel(code: String): String =
     runCatching { java.util.Currency.getInstance(code) }.getOrNull()
         ?.let { "${it.getDisplayName(Locale.getDefault())} (${it.getSymbol(Locale.getDefault())})" }
         ?: code

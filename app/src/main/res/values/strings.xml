@@ -52,7 +52,7 @@
     <string name="lock_too_many">Too many tries. Try again in %1$d s</string>
     <string name="lock_forgot">Forgot PIN?</string>
     <string name="lock_forgot_title">Forgot your PIN?</string>
-    <string name="lock_forgot_body">The PIN can\'t be recovered. SumCtrl will delete your history and every setting on this phone and turn the app lock off.</string>
+    <string name="lock_forgot_body">The PIN can\'t be recovered. SumCtrl will delete your history, memory, named values and every setting on this phone and turn the app lock off.</string>
     <string name="lock_forgot_confirm">Delete everything and reset</string>
     <string name="lock_choose_pin">Choose an app PIN</string>
     <string name="lock_enable_intro">At least %1$d digits, different from your phone\'s PIN. If you forget it, the only way back in is to delete your history and settings and start again.</string>
@@ -109,22 +109,63 @@
     <string name="err_div_zero">Can\'t divide by zero</string>
     <string name="err_domain">No answer for that</string>
     <string name="err_too_big">Number too big</string>
+    <string name="err_unknown_value">That named value no longer exists</string>
+    <string name="cursor_move">Typing at the cursor. Tap the end of the sum to type at the end again.</string>
+
+    <!-- Memory and named values -->
+    <string name="memory_clear">Clear memory</string>
+    <string name="memory_recall">Use the memory in the sum</string>
+    <string name="memory_add">Add to memory</string>
+    <string name="memory_subtract">Subtract from memory</string>
+    <string name="memory_in_use">A number is in the memory</string>
+    <string name="values_title">Named values</string>
+    <string name="values_memory">Memory</string>
+    <string name="values_memory_empty">Empty</string>
+    <string name="values_save">Save the result under a name</string>
+    <string name="values_save_title">Save %1$s as</string>
+    <string name="values_name">Name</string>
+    <string name="values_name_hint">Letters, digits and _, starting with a letter. Use it in sums by name.</string>
+    <string name="values_name_invalid">Start with a letter and use only letters, digits and _. Names of keys such as e, M, Ans or sin can't be used.</string>
+    <string name="values_name_replaces">A value with this name exists and will be replaced.</string>
+    <string name="values_empty">No named values</string>
+    <string name="values_empty_body">Save a result under a name, like rate or rent, and use it in later sums with every digit it was saved with. They are kept encrypted on this phone.</string>
+    <string name="values_set_aside_body">Your earlier named values are stored encrypted on this phone and couldn't be opened, so they were kept aside, not deleted. They come back by themselves if they can be opened again.</string>
+    <string name="values_use">Use in the sum</string>
+    <string name="values_remove">Delete this value</string>
 
     <!-- History -->
     <string name="history_clear">Clear history</string>
     <string name="history_clear_title">Clear history?</string>
     <string name="history_clear_body">Every saved sum is deleted from this phone. This can\'t be undone.</string>
     <string name="history_empty">No sums yet</string>
-    <string name="history_empty_body">Every sum you finish with = shows up here. Tap one to use its result again.</string>
+    <string name="history_empty_body">Every sum you finish with = shows up here. Tap one to use its result again, add a note to it, or export them all as a CSV file for a spreadsheet.</string>
     <string name="history_set_aside_body">Your earlier history is stored encrypted on this phone and couldn\'t be opened, so a new history was started. The earlier one is kept aside, not deleted, and comes back by itself if it can be opened again. Clearing your history deletes it too.</string>
     <string name="history_off">History is off</string>
     <string name="history_off_body">Turn on Save history in Settings to keep finished sums here.</string>
     <string name="history_remove">Remove from history</string>
     <string name="history_use">Use this result</string>
+    <string name="history_note_add">Add a note</string>
+    <string name="history_note_edit">Change the note</string>
+    <string name="history_note_title">Note</string>
+    <string name="history_note_hint">What this sum was for. Leave empty to remove the note.</string>
+    <string name="csv_export">Export as CSV</string>
+    <string name="csv_saved">History saved as a CSV file</string>
+    <string name="csv_failed">Couldn't save the CSV file</string>
+    <string name="csv_time">Time</string>
+    <string name="csv_sum">Sum</string>
+    <string name="csv_result">Result</string>
+    <string name="csv_note">Note</string>
     <plurals name="history_count">
         <item quantity="one">%d sum saved on this phone</item>
         <item quantity="other">%d sums saved on this phone</item>
     </plurals>
+
+    <!-- "Calculate" in other apps' text selection -->
+    <string name="calculate_menu">Calculate</string>
+    <string name="calculate_not_a_sum">The selected text isn\'t a sum SumCtrl can read. Select numbers with +, −, ×, ÷, %, ^ or brackets, like 12,50 + 3,20.</string>
+    <string name="calculate_close">Close</string>
+    <string name="calculate_copy">Copy</string>
+    <string name="calculate_replace">Replace</string>
 
     <!-- Converter -->
     <string name="convert_from">From</string>
@@ -242,7 +283,7 @@
     <string name="u_turn">Turn</string>
 
     <!-- Work tools -->
-    <string name="tools_footer">Every tool works offline and uses exact decimal maths. Amounts are rounded to cents only when shown.</string>
+    <string name="tools_footer">Every tool works offline and uses exact decimal maths. Amounts are rounded to cents only when shown (the loan table works in cents, like a bank).</string>
     <string name="tool_vat">VAT</string>
     <string name="tool_vat_sub">Add or remove VAT: 21 %, 12 %, 6 % or your own rate</string>
     <string name="tool_discount">Discount</string>
@@ -304,6 +345,75 @@
     <string name="pct_change_title">Change from X to Y</string>
     <string name="pct_change_a">From</string>
     <string name="pct_change_b">To</string>
+
+    <string name="tool_tip">Tip and split</string>
+    <string name="tool_tip_sub">Add a tip and split the bill between people</string>
+    <string name="tool_dates">Date difference</string>
+    <string name="tool_dates_sub">Days, weeks, months and workdays between two dates</string>
+    <string name="tool_loan">Loan table</string>
+    <string name="tool_loan_sub">Monthly payment with interest and principal for every month</string>
+    <string name="tool_currency">Currency</string>
+    <string name="tool_currency_sub">Convert money with an exchange rate you type</string>
+    <string name="tool_programmer">Programmer</string>
+    <string name="tool_programmer_sub">Hex, decimal, octal and binary, with AND, OR, XOR and shifts</string>
+
+    <string name="tip_bill">Bill</string>
+    <string name="tip_percent">Tip</string>
+    <string name="tip_people">People</string>
+    <string name="tip_each">Each pays</string>
+    <string name="tip_tip">Tip</string>
+    <string name="tip_total">Total with tip</string>
+    <string name="tip_paid_rounded">%1$d people pay together</string>
+    <string name="tip_no_people">Split between at least 1 person.</string>
+    <string name="tip_note">Each share is rounded up to the cent, so together you always cover the bill; the last line shows what that adds up to when it's a little more.</string>
+
+    <string name="dates_from">From</string>
+    <string name="dates_to">To</string>
+    <string name="dates_today_from">From today</string>
+    <string name="dates_today_to">To today</string>
+    <string name="dates_swap">Swap dates</string>
+    <string name="dates_days">Difference</string>
+    <string name="dates_weeks">In weeks</string>
+    <string name="dates_period">In years, months and days</string>
+    <string name="dates_workdays">Workdays (Mon–Fri)</string>
+    <string name="dates_note">Counts from the first date up to, but not including, the second. Workdays are Monday to Friday; public holidays aren't taken off.</string>
+    <plurals name="days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <plurals name="weeks">
+        <item quantity="one">%d week</item>
+        <item quantity="other">%d weeks</item>
+    </plurals>
+    <plurals name="months">
+        <item quantity="one">%d month</item>
+        <item quantity="other">%d months</item>
+    </plurals>
+    <plurals name="years">
+        <item quantity="one">%d year</item>
+        <item quantity="other">%d years</item>
+    </plurals>
+
+    <string name="loan_amount">Amount borrowed</string>
+    <string name="loan_impossible">Use 1 to %1$d months, and an amount and rate that aren't negative.</string>
+    <string name="loan_table">Month by month</string>
+    <string name="loan_col_month">#</string>
+    <string name="loan_col_payment">Payment</string>
+    <string name="loan_col_interest">Interest</string>
+    <string name="loan_col_principal">Principal</string>
+    <string name="loan_col_balance">Left</string>
+    <string name="loan_show_all">Show all %1$d months</string>
+    <string name="loan_note">Fixed monthly payments with the yearly rate split over 12 months, worked out in cents like a bank statement: the payment and each month's interest are rounded to the cent, and the last payment is adjusted so nothing is left. A lender's offer can differ because of fees.</string>
+
+    <string name="fx_from">From</string>
+    <string name="fx_to">To</string>
+    <string name="fx_rate">Rate: 1 %1$s is how many %2$s</string>
+    <string name="fx_amount">Amount</string>
+    <string name="fx_swap">Swap currencies</string>
+    <string name="fx_note">SumCtrl is offline, so it never looks up rates: type the rate from your bank or a receipt. It's kept for next time.</string>
+
+    <string name="prog_type_in">Type in %1$s</string>
+    <string name="prog_err_shift">Shift by 0 to 63 bits</string>
 
     <!-- Settings -->
     <string name="group_calculator">Calculator</string>

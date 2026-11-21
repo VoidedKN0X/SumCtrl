@@ -17,10 +17,14 @@ Part of the [Ctrl series](#the-ctrl-series) by VKNXWorks.
 - **Live result** under your sum while you type, proper order of operations, brackets that close themselves at the end, and multiplication without a sign (`2π`, `3(4+1)`)
 - **Shop-style percentages:** `200 + 21%` is 242, `200 − 10%` is 180, `50%` is 0.5
 - **Scientific keys** (folded away until you need them): sin, cos, tan and their inverses in degrees or radians, ln, log, eˣ, 10ˣ, √, x², x³, xʸ, factorial, π, e and Ans
-- **History** of finished sums, kept only on your phone. Tap one to use its result again; remove one or clear them all, or turn history off
+- **History** of finished sums, kept only on your phone (encrypted). Tap one to use its result again, add a note to it, remove one or clear them all, or turn history off. **Export** the whole history as a CSV file for a spreadsheet
+- **Cursor editing:** tap anywhere in the sum to put the cursor there and type, delete or change a number in the middle
+- **Memory keys** (MC, MR, M+, M−) and **named values**: save a result under a name like `rate` and use it in later sums with every digit it was saved with. Kept encrypted on your phone
+- **"Calculate" in other apps:** select a sum in any app (`12,50 + 3,20`), choose Calculate in the selection menu, and copy the answer or put it in place of the selection
 - **Copy a result** by long-pressing it. Backspace on the display; long-press it to clear everything
 - **Unit converter** with 13 categories: length, weight, volume, temperature, area, speed, data (kB/MB/GB and KiB/MiB/GiB), time, pressure (bar, psi), energy, power (kW, PS, hp), fuel use (L/100 km, km/L, mpg) and angles, with every unit of the category listed at once
-- **Work tools:** VAT (add or remove 21 %, 12 %, 6 % or your own rate), discounts with an extra discount on top, margin and markup, instalments with interest, and percentages (X % of Y, what percent, percentage change)
+- **Work tools:** VAT (add or remove 21 %, 12 %, 6 % or your own rate), discounts with an extra discount on top, margin and markup, instalments with interest, percentages (X % of Y, what percent, percentage change), tip and split, date difference (days, weeks, months, workdays), a month-by-month loan table, and currency conversion with a rate you type
+- **Programmer mode:** 64-bit whole numbers in hex, decimal, octal and binary at once, with AND, OR, XOR, NOT, shifts and mod
 - **Numbers your way:** decimal comma or point (or follow your phone), thousands grouping, and your currency for the work tools. Number fields take a comma or a period either way
 - **App lock** with its own PIN and optional fingerprint unlock, and **Hide in screenshots** / **Hide in recent apps** (both off until you turn them on)
 - **Ctrl / Signal look**, shared by every Ctrl app: dark and light, following your phone's dark theme setting, high contrast, one violet accent, Space Grotesk and JetBrains Mono; landscape, tablet and foldable layouts
@@ -51,6 +55,8 @@ If the Obtainium button doesn't open the app, add `https://github.com/VoidedKN0X
 - **Calculator:** type your sum; the result shows underneath as you go. Tap **=** to finish it and save it to **History** (the clock button at the top). Tap **SCI** for the scientific keys and **DEG/RAD** to switch angle units.
 - **Convert:** pick a category, type a value and pick the two units. The swap button turns the result into the new input.
 - **Tools:** pick a tool and fill in the fields; results update as you type.
+- **Memory and named values:** open the scientific keys (**SCI**); the bottom row has MC, MR, M+, M− and **x=** for named values.
+- **Calculate from another app:** select a sum, then pick **Calculate** in the selection menu (sometimes under ⋮).
 
 Settings and About are behind your profile picture at the top right of every tab.
 

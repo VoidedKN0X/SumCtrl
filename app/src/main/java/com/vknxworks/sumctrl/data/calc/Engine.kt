@@ -31,6 +31,12 @@ object Engine {
     const val E = "e"
     const val ANS = "Ans"
 
+    /** The memory (M+, M−, MR). Its value comes from the values passed to [evaluate] under this key. */
+    const val MEMORY = "M"
+
+    /** A named value is typed as one token: this prefix and its name ("\$rate"). */
+    const val VAR_PREFIX = "$"
+
     /** Functions; each token includes its opening bracket. */
     val FUNCTIONS = listOf("sin(", "cos(", "tan(", "asin(", "acos(", "atan(", "ln(", "log(", "√(")
 
@@ -44,7 +50,14 @@ object Engine {
     fun isDigit(t: String) = t.length == 1 && t[0] in '0'..'9'
     fun isNumberPart(t: String) = isDigit(t) || t == POINT
     fun isFunction(t: String) = t in FUNCTIONS
-    fun isConstant(t: String) = t == PI || t == E || t == ANS
+    fun isVariable(t: String) = t == MEMORY || (t.length > 1 && t.startsWith(VAR_PREFIX))
+    fun isConstant(t: String) = t == PI || t == E || t == ANS || isVariable(t)
+
+    /** The key a variable token is looked up under in the values passed to [evaluate]. */
+    fun variableKey(t: String): String = if (t == MEMORY) MEMORY else t.removePrefix(VAR_PREFIX)
+
+    /** The token for the named value [name]. */
+    fun variableToken(name: String): String = VAR_PREFIX + name
     fun isPostfix(t: String) = t == PERCENT || t == FACTORIAL
 
     /** Whether something can follow [t] as an operand end (a number, constant, ")" or postfix). */
@@ -52,11 +65,17 @@ object Engine {
 
     /**
      * Evaluates [tokens]. Missing closing brackets at the end are added. [degrees] sets the angle unit for
-     * trig functions, [ans] is the value of "Ans".
+     * trig functions, [ans] is the value of "Ans". [values] holds the memory (under [MEMORY]) and the named
+     * values (under their name); a token for a value that isn't there is an [CalcError.UNKNOWN_VALUE].
      */
-    fun evaluate(tokens: List<String>, degrees: Boolean, ans: BigDecimal = BigDecimal.ZERO): BigDecimal {
+    fun evaluate(
+        tokens: List<String>,
+        degrees: Boolean,
+        ans: BigDecimal = BigDecimal.ZERO,
+        values: Map<String, BigDecimal> = emptyMap(),
+    ): BigDecimal {
         if (tokens.isEmpty()) throw CalcException(CalcError.SYNTAX)
-        val parser = Parser(lex(tokens), degrees, ans)
+        val parser = Parser(lex(tokens, values), degrees, ans)
         val v = parser.parseExpression()
         if (!parser.atEnd()) throw CalcException(CalcError.SYNTAX)
         return check(v.v)
@@ -73,7 +92,7 @@ object Engine {
         data class Post(val op: String) : Lex
     }
 
-    private fun lex(tokens: List<String>): List<Lex> {
+    private fun lex(tokens: List<String>, values: Map<String, BigDecimal>): List<Lex> {
         val out = ArrayList<Lex>()
         var i = 0
         while (i < tokens.size) {
@@ -90,6 +109,7 @@ object Engine {
                 t == PI -> out += Lex.Num(BigDecimal("3.141592653589793238462643383279503"))
                 t == E -> out += Lex.Num(BigDecimal("2.718281828459045235360287471352662"))
                 t == ANS -> out += Lex.Num(NANS)
+                isVariable(t) -> out += Lex.Num(values[variableKey(t)] ?: throw CalcException(CalcError.UNKNOWN_VALUE))
                 t in BINARY -> out += Lex.Op(t)
                 t == "-" -> out += Lex.Op(MINUS)
                 t == OPEN -> out += Lex.Open
@@ -357,6 +377,6 @@ object Engine {
     }
 }
 
-enum class CalcError { SYNTAX, DIV_ZERO, DOMAIN, TOO_BIG }
+enum class CalcError { SYNTAX, DIV_ZERO, DOMAIN, TOO_BIG, UNKNOWN_VALUE }
 
 class CalcException(val error: CalcError) : Exception(error.name)

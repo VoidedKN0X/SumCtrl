@@ -7,7 +7,12 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AccountBalance
 import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.Code
+import androidx.compose.material.icons.outlined.CurrencyExchange
+import androidx.compose.material.icons.outlined.DateRange
+import androidx.compose.material.icons.outlined.Restaurant
 import androidx.compose.material.icons.outlined.LocalOffer
 import androidx.compose.material.icons.outlined.Percent
 import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
@@ -31,6 +36,11 @@ enum class Tool(val id: String, @StringRes val title: Int, @StringRes val subtit
     MARGIN("margin", R.string.tool_margin, R.string.tool_margin_sub, Icons.AutoMirrored.Outlined.TrendingUp),
     INSTALMENTS("instalments", R.string.tool_instalments, R.string.tool_instalments_sub, Icons.Outlined.CalendarMonth),
     PERCENT("percent", R.string.tool_percent, R.string.tool_percent_sub, Icons.Outlined.Percent),
+    TIP("tip", R.string.tool_tip, R.string.tool_tip_sub, Icons.Outlined.Restaurant),
+    DATES("dates", R.string.tool_dates, R.string.tool_dates_sub, Icons.Outlined.DateRange),
+    LOAN("loan", R.string.tool_loan, R.string.tool_loan_sub, Icons.Outlined.AccountBalance),
+    CURRENCY("currency", R.string.tool_currency, R.string.tool_currency_sub, Icons.Outlined.CurrencyExchange),
+    PROGRAMMER("programmer", R.string.tool_programmer, R.string.tool_programmer_sub, Icons.Outlined.Code),
     ;
 
     companion object {
