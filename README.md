@@ -28,7 +28,7 @@ Part of the [Ctrl series](#the-ctrl-series) by VKNXWorks.
 - **Numbers your way:** decimal comma or point (or follow your phone), thousands grouping, and your currency for the work tools. Number fields take a comma or a period either way
 - **Export and import your settings** as a file (never the history, memory, named values or the app lock)
 - **App lock** with its own PIN and optional fingerprint unlock, and **Hide in screenshots** / **Hide in recent apps** (both off until you turn them on)
-- **English and Dutch**, following your phone's language
+- **English, Dutch, French and German**, following your phone's language
 - **Ctrl / Signal look**, shared by every Ctrl app: dark and light, following your phone's dark theme setting, high contrast, one violet accent, Space Grotesk and JetBrains Mono; landscape, tablet and foldable layouts
 
 ## Requirements
