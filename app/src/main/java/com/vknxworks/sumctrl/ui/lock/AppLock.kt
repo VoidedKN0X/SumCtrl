@@ -156,6 +156,17 @@ object AppLock {
         sideTrip = true
     }
 
+    /**
+     * SumCtrl's own window came on screen. If that happened straight from the "Calculate" pop-up (the app never
+     * went to the background in between, so [onForeground] doesn't run again), this is the real return to
+     * SumCtrl: end the side trip and check the time away now, so the lock can't be skipped that way.
+     */
+    fun onMainScreenShown(enabled: Boolean, timeoutMillis: Long) {
+        if (!sideTrip) return
+        sideTrip = false
+        onForeground(enabled, timeoutMillis)
+    }
+
     fun onBackground(enabled: Boolean, timeoutMillis: Long) {
         if (authenticating) return
         if (sideTrip) {

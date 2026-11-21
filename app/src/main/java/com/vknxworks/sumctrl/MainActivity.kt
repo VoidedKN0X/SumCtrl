@@ -23,6 +23,13 @@ import com.vknxworks.sumctrl.ui.theme.SumCtrlTheme
 
 class MainActivity : ComponentActivity() {
 
+    override fun onResume() {
+        super.onResume()
+        // Coming here straight from the "Calculate" pop-up still has to pass the lock's time-away check.
+        val c = container
+        AppLock.onMainScreenShown(c.vault.enabled, c.settings.settings.value.lockTimeout.millis)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
