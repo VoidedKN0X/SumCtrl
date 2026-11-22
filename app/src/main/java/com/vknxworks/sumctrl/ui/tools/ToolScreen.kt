@@ -126,8 +126,9 @@ private fun ColumnScope.VatTool(fmt: NumFmt) {
 
     val a = num(amount)
     val r = num(rate)
-    if (a != null && r != null) {
-        val v = WorkMath.vat(a, r, includes)
+    // A negative rate gives no result; runCatching is a safety net so odd input never closes the app.
+    val v = if (a != null && r != null) runCatching { WorkMath.vat(a, r, includes) }.getOrNull() else null
+    if (v != null && r != null) {
         Results {
             ResultRow(stringResource(R.string.vat_excl), fmt.money(v.excl), emphasis = includes)
             ResultRow(stringResource(R.string.vat_vat, fmt.percent(r)), fmt.money(v.vat))
@@ -231,9 +232,10 @@ private fun ColumnScope.InstalmentsTool(fmt: NumFmt) {
     val n = months.toIntOrNull()
     val r = num(rate) ?: BigDecimal.ZERO
     if (p != null && n != null) {
-        val i = WorkMath.instalments(p, d, n, r)
+        // Null (and the "impossible" note) for a negative rate or too many months; runCatching as a safety net.
+        val i = runCatching { WorkMath.instalments(p, d, n, r) }.getOrNull()
         if (i == null) {
-            FieldNote(stringResource(R.string.inst_impossible))
+            FieldNote(stringResource(R.string.inst_impossible, WorkMath.MAX_LOAN_MONTHS))
         } else {
             Results {
                 ResultRow(stringResource(R.string.inst_monthly, n), fmt.money(i.monthly), emphasis = true)
@@ -430,7 +432,7 @@ private fun ColumnScope.LoanTool(fmt: NumFmt) {
     val r = num(rate) ?: BigDecimal.ZERO
     val n = months.toIntOrNull()
     if (a != null && n != null) {
-        val loan = remember(a, r, n) { WorkMath.loan(a, r, n) }
+        val loan = remember(a, r, n) { runCatching { WorkMath.loan(a, r, n) }.getOrNull() }
         if (loan == null) {
             FieldNote(stringResource(R.string.loan_impossible, WorkMath.MAX_LOAN_MONTHS))
         } else {

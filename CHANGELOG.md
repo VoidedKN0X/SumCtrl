@@ -4,6 +4,19 @@ What changed in each SumCtrl release. Every release on the [Releases page](https
 
 To publish a new version: bump `versionCode` and `versionName` in `app/build.gradle.kts`, add a section here, and push to `main`. Pushes without a version bump only build; they don't make a release.
 
+## Unreleased
+
+### Fixed
+
+- **Odd numbers in the VAT and Instalments tools no longer close the app.** "Remove VAT" with a rate of −100 %, or Instalments with a negative yearly rate (−1200 %, −2400 %) or a huge number of months, used to make the app close. A negative VAT rate now just shows no result, and Instalments shows its "can't work this out" note, which now also says to use 1 to 600 months and a rate that isn't negative (the same limit as the Loan table). A yearly rate so tiny that it rounds away to nothing is now treated as 0 % in Instalments and the Loan table instead of failing. As a safety net, any other calculation error in VAT, Instalments or Loan table shows nothing instead of closing the app.
+- **The history CSV export is no longer cut short when you close the History sheet.** If you closed the sheet right after picking where to save the file, the file could end up incomplete with no message. The file is now written in the background until it's done, and the "saved" / "couldn't save" message still shows after the sheet is closed.
+- **Settings export and import finish even if you leave Settings straight away.** The same fix for the settings file: saving it, and applying an imported one after you confirmed, now finish in the background.
+
+### Security
+
+- **"Forgot PIN?" now asks for your phone's own screen lock first.** Before, anyone holding your unlocked phone could tap "Forgot PIN?" on SumCtrl's lock screen and reset it. Now, if your phone has a screen lock (PIN, pattern, password, or a strong fingerprint), SumCtrl asks for it before it deletes anything; cancelling leaves everything as it was. The dialog says so. If your phone has no screen lock, it works as before (you only confirm the dialog).
+- **History notes that start with a tab or a line break are now made safe in the CSV export too.** Text starting with `=`, `+`, `-` or `@` already got a `'` in front so a spreadsheet doesn't run it as a formula; a note starting with a tab or a carriage return now gets one as well, because some spreadsheets skip those and still run what follows.
+
 ## v0.4.0 (2026-11-21)
 
 Built and checked by CI only: nothing in this release had been run on a phone when it was published.

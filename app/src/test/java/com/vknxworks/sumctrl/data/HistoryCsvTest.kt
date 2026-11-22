@@ -21,4 +21,10 @@ class HistoryCsvTest {
         assertEquals("'=HYPERLINK(1)", HistoryCsv.field("=HYPERLINK(1)"))
         assertEquals("-6", HistoryCsv.field("-6"))
     }
+
+    @Test fun tabAndCarriageReturnAreNeutralised() {
+        assertEquals("'\t=1+1", HistoryCsv.field("\t=1+1"))
+        // A carriage return also needs quotes, as any line break does.
+        assertEquals("\"'\r=1+1\"", HistoryCsv.field("\r=1+1"))
+    }
 }

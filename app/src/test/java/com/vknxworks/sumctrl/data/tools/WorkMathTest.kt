@@ -68,4 +68,38 @@ class WorkMathTest {
         eq("0.5", WorkMath.inverseRate(BigDecimal("2")))
         assertNull(WorkMath.inverseRate(BigDecimal.ZERO))
     }
+
+    @Test fun vatRejectsNegativeRates() {
+        // -100 % used to divide by zero when removing VAT and close the app.
+        assertNull(WorkMath.vat(BigDecimal("100"), BigDecimal("-100"), amountIncludesVat = true))
+        assertNull(WorkMath.vat(BigDecimal("100"), BigDecimal("-5"), amountIncludesVat = false))
+        val v = WorkMath.vat(BigDecimal("121"), BigDecimal("21"), amountIncludesVat = true)!!
+        eq("100", v.excl)
+        eq("21", v.vat)
+        eq("0", WorkMath.vat(BigDecimal("50"), BigDecimal.ZERO, amountIncludesVat = false)!!.vat)
+    }
+
+    @Test fun instalmentsRejectOddInput() {
+        // Negative rates and absurd month counts used to throw ArithmeticException during composition.
+        assertNull(WorkMath.instalments(BigDecimal("1000"), BigDecimal.ZERO, 12, BigDecimal("-1200")))
+        assertNull(WorkMath.instalments(BigDecimal("1000"), BigDecimal.ZERO, 2, BigDecimal("-2400")))
+        assertNull(WorkMath.instalments(BigDecimal("1000"), BigDecimal.ZERO, 1_000_000_000, BigDecimal("5")))
+        assertNull(WorkMath.instalments(BigDecimal("1000"), BigDecimal.ZERO, WorkMath.MAX_LOAN_MONTHS + 1, BigDecimal.ZERO))
+        assertNull(WorkMath.instalments(BigDecimal("1000"), BigDecimal.ZERO, 0, BigDecimal.ZERO))
+        assertNull(WorkMath.instalments(BigDecimal("100"), BigDecimal("200"), 12, BigDecimal.ZERO))
+    }
+
+    @Test fun instalmentsStillWork() {
+        eq("100", WorkMath.instalments(BigDecimal("1200"), BigDecimal.ZERO, 12, BigDecimal.ZERO)!!.monthly)
+        // 1000 over 12 months at 12 % a year (1 % a month): 88.85 rounded.
+        val i = WorkMath.instalments(BigDecimal("1000"), BigDecimal.ZERO, 12, BigDecimal("12"))!!
+        eq("88.85", i.monthly.setScale(2, java.math.RoundingMode.HALF_UP))
+    }
+
+    @Test fun tinyRateCountsAsNoInterest() {
+        // So small that (1 + r)^-n rounds to exactly 1: no division by zero, just the amount split evenly.
+        val tiny = BigDecimal("1E-40")
+        eq("100", WorkMath.instalments(BigDecimal("1200"), BigDecimal.ZERO, 12, tiny)!!.monthly)
+        eq("100.00", WorkMath.loan(BigDecimal("1200"), tiny, 12)!!.payment)
+    }
 }

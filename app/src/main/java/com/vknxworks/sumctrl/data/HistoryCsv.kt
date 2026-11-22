@@ -33,8 +33,9 @@ object HistoryCsv {
     private fun exact(v: BigDecimal): String = if (v.signum() == 0) "0" else v.stripTrailingZeros().toPlainString()
 
     fun field(s: String): String {
-        // A leading =, +, - or @ would make a spreadsheet run the cell as a formula; text gets a quote in front.
-        val safe = if (s.isNotEmpty() && s[0] in "=+-@" && s.toBigDecimalOrNull() == null) "'$s" else s
+        // A leading =, +, - or @ would make a spreadsheet run the cell as a formula, and so can a tab or carriage
+        // return in front of one (OWASP lists both); text that starts with any of them gets a quote in front.
+        val safe = if (s.isNotEmpty() && s[0] in "=+-@\t\r" && s.toBigDecimalOrNull() == null) "'$s" else s
         return if (safe.any { it == ',' || it == '"' || it == '\n' || it == '\r' }) "\"" + safe.replace("\"", "\"\"") + "\"" else safe
     }
 }

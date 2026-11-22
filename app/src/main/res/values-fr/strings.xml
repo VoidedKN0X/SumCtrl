@@ -44,6 +44,10 @@
     <string name="lock_forgot">Code PIN oublié ?</string>
     <string name="lock_forgot_title">Vous avez oublié votre code PIN ?</string>
     <string name="lock_forgot_body">Le code PIN ne peut pas être récupéré. SumCtrl supprimera votre historique, la mémoire, les valeurs nommées et tous les paramètres sur ce téléphone, puis désactivera le verrouillage.</string>
+    <string name="lock_forgot_screen_lock">Le verrouillage d\'écran de votre téléphone vous sera d\'abord demandé, pour que vous seul puissiez le réinitialiser.</string>
+    <string name="lock_reset_prompt_title">Réinitialiser le verrouillage de SumCtrl</string>
+    <string name="lock_reset_prompt_subtitle">Utilisez le verrouillage d\'écran de votre téléphone pour confirmer votre identité</string>
+    <string name="lock_reset_prompt_failed">Impossible d\'afficher le verrouillage d\'écran</string>
     <string name="lock_forgot_confirm">Tout supprimer et réinitialiser</string>
     <string name="lock_choose_pin">Choisissez un code PIN pour l\'application</string>
     <string name="lock_enable_intro">Au moins %1$d chiffres, différent du code PIN de votre téléphone. Si vous l\'oubliez, la seule solution est de supprimer votre historique et vos paramètres et de recommencer.</string>
@@ -304,7 +308,7 @@
     <string name="inst_financed">Payé en plusieurs fois</string>
     <string name="inst_total">Total payé</string>
     <string name="inst_interest">Intérêts</string>
-    <string name="inst_impossible">L\'acompte dépasse le prix, ou il n\'y a aucun mois.</string>
+    <string name="inst_impossible">L\'acompte dépasse le prix, ou les mois ou le taux ne conviennent pas : utilisez 1 à %1$d mois et un taux non négatif.</string>
     <string name="inst_note">Mensualités fixes avec le taux annuel réparti sur 12 mois. À 0 %, le montant est divisé à parts égales. L\'offre d\'un prêteur peut différer à cause des frais et de sa façon d\'arrondir.</string>
     <string name="pct_of_title">X % de Y</string>
     <string name="pct_of_a">Pourcentage</string>

@@ -53,13 +53,17 @@ fun BackupGroup() {
     val save = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri: Uri? ->
         if (uri == null) return@rememberLauncherForActivityResult
         val text = SettingsBackups.export(SettingsBackups.from(c.settings.settings.value, BuildConfig.VERSION_NAME, OffsetDateTime.now().toString()))
-        scope.launch {
+        val app = context.applicationContext
+        // In the app's scope, so leaving Settings right after picking the file doesn't cut the file short.
+        c.appScope.launch {
             val ok = runCatching {
                 withContext(Dispatchers.IO) {
-                    context.contentResolver.openOutputStream(uri, "wt")?.use { it.write(text.toByteArray(Charsets.UTF_8)) } ?: error("no stream")
+                    app.contentResolver.openOutputStream(uri, "wt")?.use { it.write(text.toByteArray(Charsets.UTF_8)) } ?: error("no stream")
                 }
             }.isSuccess
-            toast(if (ok) R.string.backup_saved else R.string.backup_save_failed)
+            withContext(Dispatchers.Main) {
+                Toast.makeText(app, if (ok) R.string.backup_saved else R.string.backup_save_failed, Toast.LENGTH_LONG).show()
+            }
         }
     }
 
@@ -99,9 +103,11 @@ fun BackupGroup() {
             confirmButton = {
                 TextButton(onClick = {
                     pending = null
-                    scope.launch {
+                    val app = context.applicationContext
+                    // In the app's scope, so leaving Settings straight away doesn't stop the import halfway.
+                    c.appScope.launch {
                         c.settings.update { SettingsBackups.apply(b, it) }
-                        toast(R.string.backup_restored)
+                        withContext(Dispatchers.Main) { Toast.makeText(app, R.string.backup_restored, Toast.LENGTH_LONG).show() }
                     }
                 }) { Text(stringResource(R.string.backup_restore_confirm)) }
             },

@@ -9,7 +9,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material3.TextButton
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import com.vknxworks.sumctrl.data.HistoryCsv
@@ -77,7 +76,6 @@ fun HistorySheet(fmt: NumFmt, enabled: Boolean, onDismiss: () -> Unit, onPick: (
     var confirmClear by remember { mutableStateOf(false) }
     var editing by remember { mutableStateOf<HistoryEntry?>(null) }
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     val header = listOf(
         stringResource(R.string.csv_time),
         stringResource(R.string.csv_sum),
@@ -89,15 +87,20 @@ fun HistorySheet(fmt: NumFmt, enabled: Boolean, onDismiss: () -> Unit, onPick: (
     val export = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri: Uri? ->
         if (uri == null) return@rememberLauncherForActivityResult
         val list = c.history.entries.value
-        scope.launch {
+        val app = context.applicationContext
+        // In the app's own scope, not the sheet's: closing the sheet right after picking the file must not cut
+        // the file short. The toast uses the application context, so it still shows when the sheet is gone.
+        c.appScope.launch {
             val ok = runCatching {
                 val text = HistoryCsv.write(list, ZoneId.systemDefault(), header)
                 withContext(Dispatchers.IO) {
-                    context.contentResolver.openOutputStream(uri, "wt")?.use { it.write(text.toByteArray(Charsets.UTF_8)) }
+                    app.contentResolver.openOutputStream(uri, "wt")?.use { it.write(text.toByteArray(Charsets.UTF_8)) }
                         ?: error("no stream")
                 }
             }.isSuccess
-            Toast.makeText(context, if (ok) R.string.csv_saved else R.string.csv_failed, Toast.LENGTH_LONG).show()
+            withContext(Dispatchers.Main) {
+                Toast.makeText(app, if (ok) R.string.csv_saved else R.string.csv_failed, Toast.LENGTH_LONG).show()
+            }
         }
     }
 

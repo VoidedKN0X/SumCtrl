@@ -40,6 +40,10 @@
     <string name="lock_forgot">Pincode vergeten?</string>
     <string name="lock_forgot_title">Pincode vergeten?</string>
     <string name="lock_forgot_body">De pincode kan niet hersteld worden. SumCtrl wist je geschiedenis, geheugen, benoemde waarden en alle instellingen op deze telefoon en zet de app-vergrendeling uit.</string>
+    <string name="lock_forgot_screen_lock">Eerst vraagt je telefoon zijn schermvergrendeling, zodat alleen jij dit kunt resetten.</string>
+    <string name="lock_reset_prompt_title">App-vergrendeling van SumCtrl resetten</string>
+    <string name="lock_reset_prompt_subtitle">Bevestig met de schermvergrendeling van je telefoon dat jij het bent</string>
+    <string name="lock_reset_prompt_failed">De schermvergrendeling kon niet getoond worden</string>
     <string name="lock_forgot_confirm">Alles wissen en opnieuw beginnen</string>
     <string name="lock_choose_pin">Kies een app-pincode</string>
     <string name="lock_enable_intro">Minstens %1$d cijfers, anders dan de pincode van je telefoon. Vergeet je ze, dan kom je alleen weer binnen door je geschiedenis en instellingen te wissen en opnieuw te beginnen.</string>
@@ -297,7 +301,7 @@
     <string name="inst_financed">Afbetaald in schijven</string>
     <string name="inst_total">Totaal betaald</string>
     <string name="inst_interest">Interest</string>
-    <string name="inst_impossible">Het voorschot is meer dan de prijs, of er zijn geen maanden.</string>
+    <string name="inst_impossible">Het voorschot is meer dan de prijs, of de maanden of rentevoet kloppen niet: gebruik 1 tot %1$d maanden en een rentevoet die niet negatief is.</string>
     <string name="inst_note">Vaste maandbedragen, met de jaarlijkse rentevoet verdeeld over 12 maanden. 0 % verdeelt het bedrag gelijk. Een aanbod van een kredietgever kan verschillen door kosten en hoe er afgerond wordt.</string>
     <string name="pct_of_title">X % van Y</string>
     <string name="pct_of_a">Procent</string>

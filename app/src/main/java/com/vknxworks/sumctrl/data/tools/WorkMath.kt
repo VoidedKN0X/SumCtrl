@@ -18,8 +18,9 @@ object WorkMath {
 
     data class Vat(val excl: BigDecimal, val vat: BigDecimal, val incl: BigDecimal)
 
-    /** [amount] with or without VAT at [rate] percent. */
-    fun vat(amount: BigDecimal, rate: BigDecimal, amountIncludesVat: Boolean): Vat {
+    /** [amount] with or without VAT at [rate] percent; null for a negative rate (there's no such VAT). */
+    fun vat(amount: BigDecimal, rate: BigDecimal, amountIncludesVat: Boolean): Vat? {
+        if (rate.signum() < 0) return null
         val factor = BigDecimal.ONE.add(pct(rate))
         return if (amountIncludesVat) {
             val excl = amount.divide(factor, MC)
@@ -68,23 +69,30 @@ object WorkMath {
 
     /**
      * Paying [price] minus [down] over [months] at a nominal yearly rate of [yearlyRate] percent, with the
-     * usual fixed monthly payment (annuity). 0 % is simply the amount split evenly.
+     * usual fixed monthly payment (annuity). 0 % is simply the amount split evenly. Null for no months, more
+     * than [MAX_LOAN_MONTHS], a negative rate or more paid down than the price.
      */
     fun instalments(price: BigDecimal, down: BigDecimal, months: Int, yearlyRate: BigDecimal): Instalments? {
-        if (months <= 0) return null
+        if (months <= 0 || months > MAX_LOAN_MONTHS || yearlyRate.signum() < 0) return null
         val financed = price.subtract(down)
         if (financed.signum() < 0) return null
         val n = BigDecimal(months)
-        val monthly = if (yearlyRate.signum() == 0) {
-            financed.divide(n, MC)
-        } else {
-            val r = yearlyRate.divide(BigDecimal(1200), MC)
-            // P·r / (1 − (1 + r)^−n)
-            val growth = BigDecimal.ONE.add(r).pow(-months, MC)
-            financed.multiply(r, MC).divide(BigDecimal.ONE.subtract(growth), MC)
-        }
+        val monthly = annuity(financed, yearlyRate.divide(BigDecimal(1200), MC), months)
         val total = monthly.multiply(n, MC).add(down)
         return Instalments(financed, monthly, total, total.subtract(price))
+    }
+
+    /**
+     * The fixed monthly payment that pays back [principal] in [months] at [r] interest per month:
+     * P·r / (1 − (1 + r)^−n). A rate so small that (1 + r)^−n rounds to exactly 1 counts as no interest
+     * (the amount split evenly) instead of dividing by zero.
+     */
+    private fun annuity(principal: BigDecimal, r: BigDecimal, months: Int): BigDecimal {
+        val n = BigDecimal(months)
+        if (r.signum() == 0) return principal.divide(n, MC)
+        val denominator = BigDecimal.ONE.subtract(BigDecimal.ONE.add(r).pow(-months, MC))
+        if (denominator.signum() == 0) return principal.divide(n, MC)
+        return principal.multiply(r, MC).divide(denominator, MC)
     }
 
     /** [p] percent of [x]. */
@@ -168,13 +176,7 @@ object WorkMath {
         if (months < 1 || months > MAX_LOAN_MONTHS || amount.signum() < 0 || yearlyRate.signum() < 0) return null
         val principal = amount.setScale(2, RoundingMode.HALF_UP)
         val r = yearlyRate.divide(BigDecimal(1200), MC)
-        val exactPayment = if (r.signum() == 0) {
-            principal.divide(BigDecimal(months), MC)
-        } else {
-            val growth = BigDecimal.ONE.add(r).pow(-months, MC)
-            principal.multiply(r, MC).divide(BigDecimal.ONE.subtract(growth), MC)
-        }
-        val payment = exactPayment.setScale(2, RoundingMode.HALF_UP)
+        val payment = annuity(principal, r, months).setScale(2, RoundingMode.HALF_UP)
         val rows = ArrayList<LoanRow>(months)
         var balance = principal
         var paid = BigDecimal.ZERO

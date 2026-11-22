@@ -53,6 +53,10 @@
     <string name="lock_forgot">Forgot PIN?</string>
     <string name="lock_forgot_title">Forgot your PIN?</string>
     <string name="lock_forgot_body">The PIN can\'t be recovered. SumCtrl will delete your history, memory, named values and every setting on this phone and turn the app lock off.</string>
+    <string name="lock_forgot_screen_lock">Your phone\'s screen lock is asked for first, so only you can reset it.</string>
+    <string name="lock_reset_prompt_title">Reset SumCtrl\'s app lock</string>
+    <string name="lock_reset_prompt_subtitle">Use your phone\'s screen lock to confirm it\'s you</string>
+    <string name="lock_reset_prompt_failed">Couldn\'t show the screen lock prompt</string>
     <string name="lock_forgot_confirm">Delete everything and reset</string>
     <string name="lock_choose_pin">Choose an app PIN</string>
     <string name="lock_enable_intro">At least %1$d digits, different from your phone\'s PIN. If you forget it, the only way back in is to delete your history and settings and start again.</string>
@@ -333,7 +337,7 @@
     <string name="inst_financed">Paid in instalments</string>
     <string name="inst_total">Total paid</string>
     <string name="inst_interest">Interest</string>
-    <string name="inst_impossible">The down payment is more than the price, or there are no months.</string>
+    <string name="inst_impossible">The down payment is more than the price, or the months or rate don\'t work: use 1 to %1$d months and a rate that isn\'t negative.</string>
     <string name="inst_note">Fixed monthly payments with the yearly rate split over 12 months. 0 % divides the amount evenly. A lender\'s offer can differ because of fees and how it rounds.</string>
 
     <string name="pct_of_title">X % of Y</string>

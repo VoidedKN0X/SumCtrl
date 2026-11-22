@@ -44,6 +44,10 @@
     <string name="lock_forgot">PIN vergessen?</string>
     <string name="lock_forgot_title">PIN vergessen?</string>
     <string name="lock_forgot_body">Die PIN kann nicht wiederhergestellt werden. SumCtrl löscht deinen Verlauf, den Speicher, die benannten Werte und alle Einstellungen auf diesem Smartphone und schaltet die App-Sperre aus.</string>
+    <string name="lock_forgot_screen_lock">Zuerst wird die Displaysperre deines Smartphones abgefragt, damit nur du zurücksetzen kannst.</string>
+    <string name="lock_reset_prompt_title">App-Sperre von SumCtrl zurücksetzen</string>
+    <string name="lock_reset_prompt_subtitle">Bestätige mit der Displaysperre deines Smartphones, dass du es bist</string>
+    <string name="lock_reset_prompt_failed">Displaysperre konnte nicht angezeigt werden</string>
     <string name="lock_forgot_confirm">Alles löschen und zurücksetzen</string>
     <string name="lock_choose_pin">App-PIN wählen</string>
     <string name="lock_enable_intro">Mindestens %1$d Ziffern, anders als die PIN deines Smartphones. Wenn du sie vergisst, kommst du nur wieder rein, indem du Verlauf und Einstellungen löschst und neu anfängst.</string>
@@ -304,7 +308,7 @@
     <string name="inst_financed">In Raten gezahlt</string>
     <string name="inst_total">Insgesamt gezahlt</string>
     <string name="inst_interest">Zinsen</string>
-    <string name="inst_impossible">Die Anzahlung ist höher als der Preis, oder es gibt keine Monate.</string>
+    <string name="inst_impossible">Die Anzahlung ist höher als der Preis, oder Monate oder Zinssatz passen nicht: Verwende 1 bis %1$d Monate und einen Zinssatz, der nicht negativ ist.</string>
     <string name="inst_note">Feste Monatsraten, der Jahreszins wird auf 12 Monate verteilt. Bei 0 % wird der Betrag gleichmäßig aufgeteilt. Das Angebot eines Kreditgebers kann wegen Gebühren und Rundung abweichen.</string>
     <string name="pct_of_title">X % von Y</string>
     <string name="pct_of_a">Prozent</string>
